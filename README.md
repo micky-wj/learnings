@@ -24,17 +24,185 @@
 ### **四、《JavaScript高级程序设计》6-7章**
 ### **五、js秘密花园**
 
-## 2016.2.17(待复盘)
+---
 
-> 主要目标：布局和正则的学习
+## 2016.2.17
+
+> 主要内容：   
+1. 正则表达式  
+2. 页面布局  
+3. jquery-ui
+4. jquery-mobile
 
 ### **一、正则表达式**
-### **二、页面布局**
-#### **1. 居中实现**
-#### **2. 弹性布局**
-### **三、jquery-ui**
-### **四、jquery-mobile**
-### **五、《JavaScript高级程序设计》5章**
+1. 使用
+	*/正则表达式/ 或 new RegExp("正则表达式")
+
+2. 基本元素
+	* . 任意字符(除换行符)
+	* \d 数字(0-9)
+	* \D 非\d
+	* \w 数字(0-9)or字母a-z(包括大小写)or下划线
+	* \W 非\w
+	* \s 空格符，TAB，换行符，换页符
+	* \S 非\S
+	* \t \r \n \v \f tab 回车 换行 垂直制表符 换页符
+
+3. 限制条件
+	* [...] 字符范围以内
+	* [^...] 字符范围以外
+	* ^ 行首（匹配位置必须在行首）//^la
+	* $ 行尾 //la$
+	* \b 零边界(例:\bla (o lapa)为true,(olapa)为false)
+	* \B 非\b
+
+4. 特殊转移符
+	* \ \后面的第一个字符会当成普通的文本字符
+
+5. 分组
+	* (...) 一个分组
+	* \n n是数字，配合()使用,表示第n个分组的内容,\0表示整个表达式
+	* (?:...) 有?:的分组表示不记录在\n时会被忽略
+
+6. 重复
+	* 贪婪算法（匹配尽可能多次）
+		* x* *前字符重复>=0次
+		* x+ *前字符重复>0次
+	* 非贪婪算法（匹配尽可能少次）
+		* x*? 同x*
+		* x+? 同x+
+7. 3个flag
+	* global 匹配所有，不使用匹配到第一个就会停
+	* ignoreCase 不区分大小写
+	* multiline 按行检索
+
+8. 正则属性和方法
+	* /.../.global
+	* /.../.ignoreCase
+	* /.../.multiline
+	* /.../.source //正则内容
+	* /.../.exec('字符串'); //返还正则在字符串中匹配到的字符
+	* /.../.test('字符串'); //正则在字符串中是否匹配成功
+	* /.../.toString(); //返还正则表达式
+	* x.compole("y") //将x中的正则替换为y
+
+### **二、CSS居中实现完整攻略**
++ 水平居中：行内元素解决方案
+>只需要把行内元素包裹在一个属性display为block的父层元素中，并且把父层元素添加如下属性即可：
+
+		.parent {
+		    text-align:center;
+		}
+	
++ 水平居中：块状元素解决方案
+
+		.item {
+		    /* 这里可以设置顶端外边距 */
+		    margin: 10px auto;
+		}
+	
++ 水平居中：多个块状元素解决方案
+> 将元素的display属性设置为inline-block，并且把父元素的text-align属性设置为center即可:
+
+			.parent {
+			    text-align:center;
+			}
+			
++ 水平居中：多个块状元素解决方案 (使用flexbox布局实现)
+> 使用flexbox布局，只需要把待处理的块状元素的父元素添加属性display:flex及justify-content:center即可:
+
+		.parent {
+		    display:flex;
+		    justify-content:center;
+		}
+
++ 垂直居中：单行的行内元素解决方案
+
+		.parent {
+		    background: #222;
+		    height: 200px;
+		}
+
+/* 以下代码中，将a元素的height和line-height设置的和父元素一样高度即可实现垂直居中 */
+		a {
+		    height: 200px;
+		    line-height:200px; 
+		    color: #FFF;
+		}
++ 垂直居中：多行的行内元素解决方案
+> 组合使用display:table-cell和vertical-align:middle属性来定义需要居中的元素的父容器元素生成效果，如下：
+
+		.parent {
+		    background: #222;
+		    width: 300px;
+		    height: 300px;
+		    /* 以下属性垂直居中 */
+		    display: table-cell;
+		    vertical-align:middle;
+		}
+		
++ 垂直居中：已知高度的块状元素解决方案
+
+		.item{
+		    top: 50%;
+		    margin-top: -50px;  /* margin-top值为自身高度的一半 */
+		    position: absolute;
+		    padding:0;
+		}
+
++ 垂直居中：未知高度的块状元素解决方案
+
+		.item{
+		    top: 50%;
+		    position: absolute;
+		    transform: translateY(-50%);  /* 使用css3的transform来实现 */
+		}
+		
++ 水平垂直居中：已知高度和宽度的元素解决方案1
+这是一种不常见的居中方法，可自适应，比方案2更智能，如下：
+
+		.item{
+		    position: absolute;
+		    margin:auto;
+		    left:0;
+		    top:0;
+		    right:0;
+		    bottom:0;
+		}
+		
++ 水平垂直居中：已知高度和宽度的元素解决方案2
+
+		.item{
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    margin-top: -75px;  /* 设置margin-left / margin-top 为自身高度的一半 */
+		    margin-left: -75px;
+		}
+		
++ 水平垂直居中：未知高度和宽度元素解决方案
+
+		.item{
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    transform: translate(-50%, -50%);  /* 使用css3的transform来实现 */
+		}
+		
++ 水平垂直居中：使用flex布局实现
+
+		.parent{
+		    display: flex;
+		    justify-content:center;
+		    align-items: center;
+		    /* 注意这里需要设置高度来查看垂直居中效果 */
+		    background: #AAA;
+		    height: 300px;
+		}
+		
+### **三、弹性布局**
+[阮一峰的网络日志——Flex 布局教程：语法篇](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html?utm_source=tuicool)
+---
 
 ## 2016.2.16
 
