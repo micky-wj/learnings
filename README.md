@@ -1,18 +1,196 @@
 # Februray,2016
 ## 2016.2.19(待复盘)
 
-> 主要目标：后台语言和数据机构的学习
+> 主要内容：
+1.C语言基础
+2.C++基础
+3.使用github做博客
+4.Markdown语法
+5.css技巧
 
-### **一、雪碧图**
-### **二、前端图片延迟加载的具体实现**
-### **三、6个CSS开发的实用小技巧**
-### **四、C语言基础**
-### **五、C++基础**
-### **六、使用github做博客**
-### **七、Markdown语法**
-### **八、数据结构**
-### **九、NodeJS**
-### **十、《JavaScript高级程序设计》**
+### **一、css技巧**
+
+1. 雪碧图
+> 原理：使用CSS background和background-position属性渲染
+
+2. 前端图片延迟加载的具体实现
+> 原理：先将图片的真实地址缓存在一个自定义的属性(lazy-src)中，而src地址使用一个全透明的占位图片来代替。
+
+3. 让所有浏览器支持元素透明效果
+		.trans{
+			opacity: .7;
+			/* IE8 */
+			-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+			/* IE5-7 */
+			filter: alpha(opacity=70);
+		}
+
+4. 巧用 :before和:after
+	+ 结合border写个对话框的样式
+	
+            <style>
+            .test-div{
+                position: relative;  /*日常相对定位*/
+                width:150px;
+                height: 36px;
+                border:black 1px solid;
+                border-radius:5px;
+                background: rgba(245,245,245,1)
+            }
+            .test-div:before,.test-div:after{
+                content: "";  /*:before和:after必带技能，重要性为满5颗星*/
+                display: block;
+                position: absolute;  /*日常绝对定位*/
+                top:8px;
+                width: 0;
+                height: 0;
+                border:6px transparent solid;
+            }
+            .test-div:before{
+                left:-11px;
+                border-right-color: rgba(245,245,245,1);
+                z-index:1
+            }
+            .test-div:after{
+                left:-12px;
+                border-right-color: rgba(0,0,0,1);
+                z-index: 0
+            }
+            </style>
+            <div class="test-div"></div>
+
+	+ 作为内容的半透明背景层
+	
+            <style>
+                  body{
+                      background: url(img/1.jpg) no-repeat left top /*这里本兽加了个图片背景，用以区分背景的半透明及内容的完全不透明*/
+                  }
+                  .test-div{
+                      position: relative;  /*日常相对定位(重要，下面内容也会介绍)*/
+                      width:300px;
+                      height: 120px;
+                      padding: 20px 10px;
+                      font-weight: bold;
+                  }
+                  .test-div:before{
+                      position: absolute;  /*日常绝对定位(重要，下面内容也会略带介绍)*/
+                      content: "";  /*:before和:after必带技能，重要性为满5颗星*/
+                      top:0;
+                      left: 0;
+                      width: 100%;  /*和内容一样的宽度*/
+                      height: 100%;  /*和内容一样的高度*/
+                      background: rgba(255,255,255,.5); /*给定背景白色，透明度50%*/
+                      z-index:-1 /*日常元素堆叠顺序(重要，下面内容也会略带介绍)*/
+                  }
+              </style>
+
+5. 多行文本溢出显示省略号(…)全攻略
+	+ WebKit浏览器或移动端的页面
+
+			overflow : hidden;
+			text-overflow: ellipsis;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+
+	+ 跨浏览器兼容的方案
+
+			p {
+			    position:relative;
+			    line-height:1.4em;
+			    /* 3 times the line-height to show 3 lines */
+			    height:4.2em;
+			    overflow:hidden;
+			}
+			p::after {
+			    content:"...";
+			    font-weight:bold;
+			    position:absolute;
+			    bottom:0;
+			    right:0;
+			    padding:0 20px 1px 45px;
+			    background:url(http://www.css88.com/wp-content/uploads/2014/09/ellipsis_bg.png) repeat-y;
+			}
+
+
+### **二、快速排序js实现**
+
+	var quickSort = function(arr) {
+	　　if (arr.length <= 1) { return arr; }
+	　　var pivotIndex = Math.floor(arr.length / 2);
+	　　var pivot = arr.splice(pivotIndex, 1)[0];
+	　　var left = [];
+	　　var right = [];
+	　　for (var i = 0; i < arr.length; i++){
+	　　　　if (arr[i] < pivot) {
+	　　　　　　left.push(arr[i]);
+	　　　　} else {
+	　　　　　　right.push(arr[i]);
+	　　　　}
+	　　}
+	　　return quickSort(left).concat([pivot], quickSort(right));
+	};
+
+### **三、Markdown语法**
+>Markdown 官方文档
+[创始人 John Gruber 的 Markdown 语法说明](http://daringfireball.net/projects/markdown/syntax)
+[Markdown 中文版语法说明](http://wowubuntu.com/markdown/#list)
+
+1. 标题设置（让字体变大，和word的标题意思一样）
+在Markdown当中设置标题，有两种方式：
+第一种：通过在文字下方添加“=”和“-”，他们分别表示一级标题和二级标题。
+第二种：在文字开头加上 “#”，通过“#”数量表示几级标题。（一共只有1~6级标题，1级标题字体最大）
+
+2. 块注释（blockquote）
+通过在文字开头添加“>”表示块注释。（当>和文字之间添加五个blank时，块注释的文字会有变化。）
+
+3. 斜体
+将需要设置为斜体的文字两端使用1个“*”或者“_”夹起来
+
+4. 粗体
+将需要设置为斜体的文字两端使用2个“*”或者“_”夹起来
+
+5. 无序列表
+在文字开头添加(*, +, and -)实现无序列表。但是要注意在(*, +, and -)和文字之间需要添加空格。（建议：一个文档中只是用一种无序列表的表示方式）
+
+6. 有序列表
+使用数字后面跟上句号。（还要有空格）
+
+7. 链接（Links）
+Markdown中有两种方式，实现链接，分别为内联方式和引用方式。
+内联方式：This is an [example link](http://example.com/).
+引用方式：
+I get 10 times more traffic from [Google][1] than from [Yahoo][2] or [MSN][3].  
+
+[1]: http://google.com/        "Google" 
+[2]: http://search.yahoo.com/  "Yahoo Search" 
+[3]: http://search.msn.com/    "MSN Search"
+ 
+
+8. 图片（Images）
+图片的处理方式和链接的处理方式，非常的类似。
+内联方式：![alt text](/path/to/img.jpg "Title")
+引用方式：
+![alt text][id] 
+
+[id]: /path/to/img.jpg "Title"
+
+9. 代码（HTML中所谓的Code）
+实现方式有两种：
+第一种：简单文字出现一个代码框。使用`<blockquote>`。（`不是单引号而是左上角的ESC下面~中的`）
+第二种：大片文字需要实现代码框。使用Tab和四个空格。
+
+10. 脚注（footnote）
+实现方式如下：
+hello[^hello]
+
+
+[^hello]: hi
+
+11. 下划线
+在空白行下方添加三条“-”横线。（前面讲过在文字下方添加“-”，实现的2级标题）
+
+---
 
 ## 2016.2.18
 
