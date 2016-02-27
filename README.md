@@ -1,5 +1,67 @@
 # Februray,2016
-## 2016.2.19(待复盘)
+
+## 2016.2.21(待复盘)
+
+> 主要内容：
+1.js知识
+
+### **一、js知识**
+
+1. 严格模式
+2. 类型检测方法（小函数）
+3. try catch
+4. 属性标签（defineProperty,seal,freeze）
+5. this
+6. new运算（构造函数return的是对象，就返回该对象，否则就返回this）
+7. 闭包
+8. call,apply,bind
+9. 执行上下文EC，变量对象AO
+10. 变量初始化
+11. 原型链
+12. 链式调用
+13. 抽象类
+14. 模块化
+
+
+## 2016.2.20(待复盘)
+
+> 主要内容：
+1.HTTP请求过程
+2.浏览器渲染过程
+3.响应式设计
+4.跨域请求方法
+5.重排重绘
+6.移动端事件
+7.js回调
+8.图片格式对比
+
+### **一、HTTP请求与浏览器渲染过程**
+
+1. HTTP请求过程简述
+2. 跨域请求方法（jsonp原理）
+3. 状态码
+4. 浏览器渲染过程
+5. 重排与重绘
+
+### **二、响应式设计**
+
+1. 相关名词解释
+（1） 计量单位比较：em，rem，px
+（2） viewport
+（3） 分辨率与像素
+（4） PPI
+
+2. viewport
+
+3. 移动端事件
+touchstart touchmove tounchend
+
+### **三、js回调**
+
+### **四、图片格式对比**
+
+
+## 2016.2.19
 
 > 主要内容：
 1.C语言基础
@@ -132,65 +194,59 @@
 	};
 
 ### **三、Markdown语法**
->Markdown 官方文档
+
+>**Markdown 官方文档：**
 [创始人 John Gruber 的 Markdown 语法说明](http://daringfireball.net/projects/markdown/syntax)
 [Markdown 中文版语法说明](http://wowubuntu.com/markdown/#list)
 
 1. 标题设置（让字体变大，和word的标题意思一样）
-在Markdown当中设置标题，有两种方式：
-第一种：通过在文字下方添加“=”和“-”，他们分别表示一级标题和二级标题。
-第二种：在文字开头加上 “#”，通过“#”数量表示几级标题。（一共只有1~6级标题，1级标题字体最大）
++ 通过在文字下方添加`=`和`-`，他们分别表示一级标题和二级标题。
++ 在文字开头加上`#`，通过`#`数量表示几级标题。（一共只有1~6级标题，1级标题字体最大）
 
 2. 块注释（blockquote）
-通过在文字开头添加“>”表示块注释。（当>和文字之间添加五个blank时，块注释的文字会有变化。）
+通过在文字开头添加`>`表示块注释。（当`>`和文字之间添加五个blank时，块注释的文字会有变化。）
 
 3. 斜体
-将需要设置为斜体的文字两端使用1个“*”或者“_”夹起来
+将需要设置为斜体的文字两端使用1个`*`或者`_`夹起来
 
 4. 粗体
-将需要设置为斜体的文字两端使用2个“*”或者“_”夹起来
+将需要设置为斜体的文字两端使用2个`*`或者`_`夹起来
 
 5. 无序列表
-在文字开头添加(*, +, and -)实现无序列表。但是要注意在(*, +, and -)和文字之间需要添加空格。（建议：一个文档中只是用一种无序列表的表示方式）
+在文字开头添加(`*`, `+`, and -)实现无序列表。但是要注意在(`*`, `+`, and `-`)和文字之间需要添加空格。（建议：一个文档中只是用一种无序列表的表示方式）
 
 6. 有序列表
 使用数字后面跟上句号。（还要有空格）
 
 7. 链接（Links）
-Markdown中有两种方式，实现链接，分别为内联方式和引用方式。
-内联方式：This is an [example link](http://example.com/).
-引用方式：
-I get 10 times more traffic from [Google][1] than from [Yahoo][2] or [MSN][3].  
++ 内联方式：`This is an [example link](http://example.com/)`.
++ 引用方式：
 
-[1]: http://google.com/        "Google" 
-[2]: http://search.yahoo.com/  "Yahoo Search" 
-[3]: http://search.msn.com/    "MSN Search"
+            I get 10 times more traffic from [Google][1] than from [Yahoo][2] or [MSN][3].  
+            
+            [1]: http://google.com/        "Google" 
+            [2]: http://search.yahoo.com/  "Yahoo Search" 
+            [3]: http://search.msn.com/    "MSN Search"
  
-
 8. 图片（Images）
-图片的处理方式和链接的处理方式，非常的类似。
-内联方式：![alt text](/path/to/img.jpg "Title")
-引用方式：
-![alt text][id] 
++ 内联方式：`![alt text](/path/to/img.jpg "Title")`
++ 引用方式：
 
-[id]: /path/to/img.jpg "Title"
+            ![alt text][id] 
+            [id]: /path/to/img.jpg "Title"
 
 9. 代码（HTML中所谓的Code）
-实现方式有两种：
-第一种：简单文字出现一个代码框。使用`<blockquote>`。（`不是单引号而是左上角的ESC下面~中的`）
-第二种：大片文字需要实现代码框。使用Tab和四个空格。
++ 简单文字出现一个代码框。使用\`&lt;blockquote\&gt;\`。（\`不是单引号而是左上角的ESC下面~中的\`）
++ 大片文字需要实现代码框。使用Tab和四个空格。
 
 10. 脚注（footnote）
-实现方式如下：
-hello[^hello]
 
-
-[^hello]: hi
+        hello[^hello]
+        [^hello]: hi
 
 11. 下划线
-在空白行下方添加三条“-”横线。（前面讲过在文字下方添加“-”，实现的2级标题）
+在空白行下方添加三条`-`横线。（前面讲过在文字下方添加`-`，实现的2级标题）
 
----
 
 ## 2016.2.18
 
@@ -200,7 +256,6 @@ hello[^hello]
 3. PS切图
 4. [JavaScript秘密花园](https://bonsaiden.github.io/JavaScript-Garden/zh/)
 
----
 
 ## 2016.2.17
 
@@ -211,6 +266,7 @@ hello[^hello]
 4. jquery-mobile
 
 ### **一、正则表达式**
+
 1. 使用
 	>/正则表达式/ 或 new RegExp("正则表达式")
 
@@ -263,6 +319,7 @@ hello[^hello]
 	* x.compole("y") //将x中的正则替换为y
 
 ### **二、CSS居中实现完整攻略**
+
 + 水平居中：行内元素解决方案
 >只需要把行内元素包裹在一个属性display为block的父层元素中，并且把父层元素添加如下属性即可：
 
@@ -380,7 +437,6 @@ hello[^hello]
 
 > 可参考[阮一峰的网络日志——Flex 布局教程：语法篇](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html?utm_source=tuicool)
 
----
 
 ## 2016.2.16
 
@@ -390,6 +446,7 @@ hello[^hello]
 3. 《JavaScript高级程序设计》1-5章
 
 ### **一、html**
+
 1. Html5新特性
 	* <strong>语义</strong>：能够让你更恰当地描述你的内容是什么。
 	* <strong>连通性</strong>：能够让你和服务器之间通过创新的新技术方法进行通信。
@@ -401,6 +458,7 @@ hello[^hello]
 	* <strong>样式设计</strong>：让作者们来创作更加复杂的主题吧！
 
 ### **二、css**
+
 1. CSS3选择器
 	+ 基本选择器
 		* 通配选择器 「*」
@@ -434,6 +492,7 @@ hello[^hello]
 		*  「 E[attr$=val] 」这个选择器刚好跟E[attr^=val]相反，用来选择具有attr属性且属性值以val结尾的元素。
 
 ### **三、Javascript**
+
 1. 数据类型
 	+ 简单数据类型：undefined，null，boolean，number，string
 	+ 复杂数据类型：object
