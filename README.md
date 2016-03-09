@@ -1,13 +1,41 @@
 # Februray,2016
 
+## 2016.2.28(待复盘)
+
+> 主要内容：
+1.AMD与CMD对比
+2.MVC与MVVM
+3.cookie与session
+4.几种布局方式（双飞翼与圣杯）
+5.websocket
+
+### **一、AMD与CMD**
+
+
 ## 2016.2.21(待复盘)
 
 > 主要内容：
-1.js知识
+1.js基础知识
 
 ### **一、js知识**
 
 1. 严格模式
+> use strict
+可以写在整个函数的的里面，也可以写在整个函数的的最上面，也可以在上面加点东西啥的
+
+* 严格模式，不允许用 with 语句。否则会报syntax error语法错误
+* 一般可以隐式创建全局变量，直接进行赋值，但是严格模式会报错。
+* 普通模式下：arguments[0..n]为函数fun(a,b,c)的参数的数组表现形式
+  严格模式下：arguments对象变为参数静态副本，即只能获得实际参数的值不能改变实际参数。ps:若得到的参数为对象，则仍可以借助arguments.x对对象的属性进行修改并产生影响。
+* 在严格模式下，delete不可配置属性：Object.defineProperty(obj,'a',{configurable:false}});不能使用，会报错。
+* 对象字面量属性名重复中，一般以最后一个属性为准，但在严格模式下会报错
+* 严格模式下不能使用八进制字面量。
+* eval,arguments变为关键字，不可作为变量名和函数名。
+* eval独立作用域
+* 一般函数调用时（不是对象的方法调用，也不使用apply/call/bind等修改this）this指向null，而不是全局对象。若使用apply/call，当传入null或undefined时，this将指向null或undefined，而不是全局对象。
+* 试图修改不可泄属性(writable=false)，在不可扩展的对象上添加属性时报TyoeError，而不是忽略。
+* arguments.caller , arguments.callee被禁用
+
 2. 类型检测方法（小函数）
 3. try catch
 4. 属性标签（defineProperty,seal,freeze）
