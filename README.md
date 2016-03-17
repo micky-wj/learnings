@@ -12,7 +12,7 @@
 ### **一、AMD与CMD**
 
 
-## 2016.2.21(待复盘)
+## 2016.2.21
 
 > 主要内容：
 1.js基础知识
@@ -23,32 +23,167 @@
 > use strict
 可以写在整个函数的的里面，也可以写在整个函数的的最上面，也可以在上面加点东西啥的
 
-* 严格模式，不允许用 with 语句。否则会报syntax error语法错误
-* 一般可以隐式创建全局变量，直接进行赋值，但是严格模式会报错。
-* 普通模式下：arguments[0..n]为函数fun(a,b,c)的参数的数组表现形式
-  严格模式下：arguments对象变为参数静态副本，即只能获得实际参数的值不能改变实际参数。ps:若得到的参数为对象，则仍可以借助arguments.x对对象的属性进行修改并产生影响。
-* 在严格模式下，delete不可配置属性：Object.defineProperty(obj,'a',{configurable:false}});不能使用，会报错。
-* 对象字面量属性名重复中，一般以最后一个属性为准，但在严格模式下会报错
-* 严格模式下不能使用八进制字面量。
-* eval,arguments变为关键字，不可作为变量名和函数名。
+* 不能使用with
+* 变量不声明不能赋值（ReferenceError）
+* arguments变为参数的静态副本
+* delete参数、函数名报错
+* delete不可配置的属性也会报错:Object.defineProperty(obj,'a',{configurable:false})
+* 对象字面量属性名重复报错
+* 禁止八进制的字面量
+* eval arguments变为关键字，不能够作为变量或函数名
 * eval独立作用域
 * 一般函数调用时（不是对象的方法调用，也不使用apply/call/bind等修改this）this指向null，而不是全局对象。若使用apply/call，当传入null或undefined时，this将指向null或undefined，而不是全局对象。
-* 试图修改不可泄属性(writable=false)，在不可扩展的对象上添加属性时报TyoeError，而不是忽略。
+* 试图修改不可写属性(writable=false)，在不可扩展的对象上添加属性时报TypeError，而不是忽略。
 * arguments.caller , arguments.callee被禁用
 
-2. 类型检测方法（小函数）
-3. try catch
-4. 属性标签（defineProperty,seal,freeze）
-5. this
-6. new运算（构造函数return的是对象，就返回该对象，否则就返回this）
-7. 闭包
-8. call,apply,bind
-9. 执行上下文EC，变量对象AO
-10. 变量初始化
-11. 原型链
-12. 链式调用
-13. 抽象类
-14. 模块化
+1. 包装对象
+> 当基本类型以对象的方式去使用时，JavaScript会转换成对应的包装类型，相当于new一个对象，内容和基本类型的内容一样，然后当操作完成再去访问的时候，这个临时对象会被销毁，然后再访问时候就是undefined。
+number,string,boolean都有对应的包装类型。
+
+1. 类型检测
+
+    * typeof:返回字符串，适合函数（function）对象和基本类型的判断监测,遇到null失效
+    ```
+    typeof 100 "number"//返回字符串number
+    typeof true "boolean"
+    typeof function "function"
+    typeof (undefined) "undefined"
+    typeof new Object() "object"
+    typeof [1,2] "object"//没有经过特殊处理
+    typeof NaN "number"
+    typeof null "object"//兼容问题
+    ```
+    * instanceof:适用于自定义对象，也可以监测原生对象
+    > obj .. Object//基于原型链
+    左操作数期望是对象，右操作数必须是函数对象，否则会抛出type error
+    会判断左操作数在原型链上是否有右边构造函数的prototype属性
+    任何一个构造函数都有一个prototype属性
+    不同window或iframe间的对象类型检测不能使用instanceof
+    
+    * Object.prototype.toString:遇到null,undefiend失效
+    
+        ```
+        Object.prototype.toString.apply([])==="[object Array]"//判断数组
+        ```
+    
+    * constructor:任何一个对象都有一个constructor属性，指向构造这个对象的构造器或者构造函数，可以被改写
+    * duck type
+    > 比如不知道这个是不是数组，可以判断他的特征：length数字，是否有joying,push等等
+
+1. 继承
+
+* Student.protptype = Rerson.prototype; // 禁止使用，修改子类时会一并修改父类
+* Student.prototype = new Person(); // 不推荐使用，使用Person的构造器创建会带回Person的参数
+* Student.prototype = Object.create(Person.prototype); //理想的继承方式
+    ES5以下没有Object.create()方法，以下为模拟方式：
+    ```
+    if (!Object.create) {
+        Object.create = function(proto) {
+            function F() {}
+            F.prototype = proto;
+            return new F;
+        };
+    }
+    ```
+1. try catch
+> try语句如果抛出异常，则执行catch语句，否则不执行，无论有没有异常，都执行finally语句；try语句必须跟catch或finally语句中至少一个组合使用。
+
+    **try catch语句的嵌套语句执行顺序：**
+    * 如果内部嵌套的try语句抛出异常，但内部没有相配套的catch语句，先执行内部的finally语句，然后跳到最近一层的catch语句执行。
+    
+    * 如果内部嵌套的try语句抛出异常，内部有相配套的catch语句，先执行此语句处理异常，再执行内部的finally语句。不会再在外部处理异常。
+    
+    * 如果内部嵌套的try语句抛出异常，内部有相配套的catch语句，并且catch语句也抛出异常，如果内部的catch语句有对异常的处理，先执行异常处理语句，然后执行内部的finally语句，最后执行离内部catch语句抛出异常最近一层的catch语句处理异常。
+
+
+
+1. 属性标签（defineProperty,seal,freeze）
+* 属性标签: writeable,enumerable,configurable,value,get/set方法。这些可以为属性提供访问权限的控制。
+![属性标签限制](/imgs/2-propertylimit.jpg)
+* Object.preventExtensions()让一个对象变的不可扩展，也就是永远不能再添加新的属性。但是要加上Object.seal(obj)才算是真正的限制修改、删除，此时（configurable = false）。
+* Object.seal() 方法可以让一个对象密封，并返回被密封后的对象。密封对象是指那些不能添加新的属性，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性，但可能可以修改已有属性的值的对象。（configurable = false）
+* Object.freeze() 方法可以冻结一个对象。冻结对象是指那些不能添加新的属性，不能修改已有属性的值，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性的对象。也就是说，这个对象永远是不可变的。该方法返回被冻结的对象。（writeable和configurable都为false）
+
+        注意：上述提到的方法只是针对某个对象的，比如说冻结一个对象时，并不会影响对象的原型链，如果想对原型链做类似处理的话，可以通过Object.prototypeof（）的方法拿到对象的原型，一层层遍历，然后freeze
+* Object.isExtensible(obj)判断是否可扩展；Object.isSealed(obj)判断是否被隐藏；Object.isFrozen(obj)判断对象当前是否被冻结。
+
+1. this
+    
+* 全局的this //this指向浏览器
+* 一般函数的this //this指向浏览器
+* 作为对象方法的函数的this //this指向对象
+* 对象原型链上的this //this指向对象本身
+* get/set方法中的this //指向对象本身
+* 构造器中的this
+    ```
+    function yy(){ this.a = 33;} var xx = new yy()
+    // this会指向空对象，并且空对象的原型指向一样yy();的prototype属性；当没有return或者return基本类型时，会返回this。如果是对象，则返回该对象。
+    ```
+
+* apply,call
+    a.call(b,xx,xx)中this指向当前的作用域.这里a方法在b作用域中执行this指向b；
+* var g = f.bind({a:"test"}); //this指向bind的参数对象 {a:"test"}
+
+1. 自执行函数
+> !function, +function, (function(){})();
+告诉浏览器自动运行这个匿名函数的，因为!+()这些符号的运算符是最高的，所以会先运行它们后面的函数
+
+1. 原型链
+    ![原型链](/imgs/1-prototype.jpg)
+
+1. bind方法模拟
+    ![bind方法模拟](/imgs/3-bind.jpg)
+
+1. 链式调用
+    ```
+    window.$ = function(id){
+        return new _$(id);
+    }
+    
+    function _$(id){
+        this.elements = document.getElementById(id);
+    }
+    
+    _$.prototype = {
+        constructor:_$,
+        hide:function(){
+            console.log('hide');
+            return this;
+        },
+        show:function(){
+            console.log('show');
+            return this;
+        },
+        getName:function(callback){
+            if(callback){
+                callback.call(this,this.name);
+            }
+            return this;
+        },
+        setName:function(name){
+            this.name = name;
+            return this;
+        }
+    }
+    
+    $('id').setName('xesam').getName(function(name){
+        console.log(name);
+    }).show().hide().show().hide().show();    
+    ```
+1. 模块化
+> 模块化函数内部变量不会泄漏到全局作用域。
+
+* 定义立即执行函数
+moduleA = function(){}();
+* this 方法
+    ```
+    moduleA = new function(){
+        var prop = 1;
+        function func(){}
+        this.func = func;
+        this.prop = prop;
+    }
+    ```
 
 
 ## 2016.2.20(待复盘)
