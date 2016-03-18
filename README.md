@@ -2,63 +2,65 @@
 
 ## 2016.2.28(待复盘)
 
-> 主要内容：
-1.AMD与CMD对比
-2.MVC与MVVM
-3.cookie与session
-4.几种布局方式（双飞翼与圣杯）
-5.websocket
+> **主要内容：**
+	1. AMD与CMD对比
+	2. MVC与MVVM
+	3. cookie与session
+	4. 几种布局方式（双飞翼与圣杯）
+	5. websocket
 
 ### **一、AMD与CMD**
 
 
 ## 2016.2.21
 
-> 主要内容：
-1.js基础知识
+> **主要内容：**
+	1. js基础知识
 
 ### **一、js知识**
 
 1. 严格模式
-> use strict
-可以写在整个函数的的里面，也可以写在整个函数的的最上面，也可以在上面加点东西啥的
+	> use strict
+	> 可以写在整个函数的的里面，也可以写在整个函数的的最上面，也可以在上面加点东西啥的
 
-* 不能使用with
-* 变量不声明不能赋值（ReferenceError）
-* arguments变为参数的静态副本
-* delete参数、函数名报错
-* delete不可配置的属性也会报错:Object.defineProperty(obj,'a',{configurable:false})
-* 对象字面量属性名重复报错
-* 禁止八进制的字面量
-* eval arguments变为关键字，不能够作为变量或函数名
-* eval独立作用域
-* 一般函数调用时（不是对象的方法调用，也不使用apply/call/bind等修改this）this指向null，而不是全局对象。若使用apply/call，当传入null或undefined时，this将指向null或undefined，而不是全局对象。
-* 试图修改不可写属性(writable=false)，在不可扩展的对象上添加属性时报TypeError，而不是忽略。
-* arguments.caller , arguments.callee被禁用
+	* 不能使用with
+	* 变量不声明不能赋值（ReferenceError）
+	* arguments变为参数的静态副本
+	* delete参数、函数名报错
+	* delete不可配置的属性也会报错:Object.defineProperty(obj,'a',{configurable:false})
+	* 对象字面量属性名重复报错
+	* 禁止八进制的字面量
+	* eval arguments变为关键字，不能够作为变量或函数名
+	* eval独立作用域
+	* 一般函数调用时（不是对象的方法调用，也不使用apply/call/bind等修改this）this指向null，而不是全局对象。若使用apply/call，当传入null或undefined时，this将指向null或undefined，而不是全局对象。
+	* 试图修改不可写属性(writable=false)，在不可扩展的对象上添加属性时报TypeError，而不是忽略。
+	* arguments.caller , arguments.callee被禁用
 
 1. 包装对象
-> 当基本类型以对象的方式去使用时，JavaScript会转换成对应的包装类型，相当于new一个对象，内容和基本类型的内容一样，然后当操作完成再去访问的时候，这个临时对象会被销毁，然后再访问时候就是undefined。
-number,string,boolean都有对应的包装类型。
+	当基本类型以对象的方式去使用时，JavaScript会转换成对应的包装类型，相当于new一个对象，内容和基本类型的内容一样，然后当操作完成再去访问的时候，这个临时对象会被销毁，然后再访问时候就是undefined。
+
+	number,string,boolean都有对应的包装类型。
 
 1. 类型检测
-
     * typeof:返回字符串，适合函数（function）对象和基本类型的判断监测,遇到null失效
-    ```
-    typeof 100 "number"//返回字符串number
-    typeof true "boolean"
-    typeof function "function"
-    typeof (undefined) "undefined"
-    typeof new Object() "object"
-    typeof [1,2] "object"//没有经过特殊处理
-    typeof NaN "number"
-    typeof null "object"//兼容问题
-    ```
+
+	    ```
+	    typeof 100 "number"//返回字符串number
+	    typeof true "boolean"
+	    typeof function "function"
+	    typeof (undefined) "undefined"
+	    typeof new Object() "object"
+	    typeof [1,2] "object"//没有经过特殊处理
+	    typeof NaN "number"
+	    typeof null "object"//兼容问题
+	    ```
+
     * instanceof:适用于自定义对象，也可以监测原生对象
-    > obj .. Object//基于原型链
-    左操作数期望是对象，右操作数必须是函数对象，否则会抛出type error
-    会判断左操作数在原型链上是否有右边构造函数的prototype属性
-    任何一个构造函数都有一个prototype属性
-    不同window或iframe间的对象类型检测不能使用instanceof
+	    obj .. Object//基于原型链
+	    左操作数期望是对象，右操作数必须是函数对象，否则会抛出type error
+	    会判断左操作数在原型链上是否有右边构造函数的prototype属性
+	    任何一个构造函数都有一个prototype属性
+	    不同window或iframe间的对象类型检测不能使用instanceof
     
     * Object.prototype.toString:遇到null,undefiend失效
     
@@ -68,14 +70,14 @@ number,string,boolean都有对应的包装类型。
     
     * constructor:任何一个对象都有一个constructor属性，指向构造这个对象的构造器或者构造函数，可以被改写
     * duck type
-    > 比如不知道这个是不是数组，可以判断他的特征：length数字，是否有joying,push等等
+    	比如不知道这个是不是数组，可以判断他的特征：length数字，是否有joying,push等等
 
 1. 继承
-
 * Student.protptype = Rerson.prototype; // 禁止使用，修改子类时会一并修改父类
 * Student.prototype = new Person(); // 不推荐使用，使用Person的构造器创建会带回Person的参数
 * Student.prototype = Object.create(Person.prototype); //理想的继承方式
     ES5以下没有Object.create()方法，以下为模拟方式：
+
     ```
     if (!Object.create) {
         Object.create = function(proto) {
@@ -85,8 +87,9 @@ number,string,boolean都有对应的包装类型。
         };
     }
     ```
+
 1. try catch
-> try语句如果抛出异常，则执行catch语句，否则不执行，无论有没有异常，都执行finally语句；try语句必须跟catch或finally语句中至少一个组合使用。
+	> try语句如果抛出异常，则执行catch语句，否则不执行，无论有没有异常，都执行finally语句；try语句必须跟catch或finally语句中至少一个组合使用。
 
     **try catch语句的嵌套语句执行顺序：**
     * 如果内部嵌套的try语句抛出异常，但内部没有相配套的catch语句，先执行内部的finally语句，然后跳到最近一层的catch语句执行。
@@ -98,35 +101,35 @@ number,string,boolean都有对应的包装类型。
 
 
 1. 属性标签（defineProperty,seal,freeze）
-* 属性标签: writeable,enumerable,configurable,value,get/set方法。这些可以为属性提供访问权限的控制。
-![属性标签限制](/imgs/2-propertylimit.jpg)
-* Object.preventExtensions()让一个对象变的不可扩展，也就是永远不能再添加新的属性。但是要加上Object.seal(obj)才算是真正的限制修改、删除，此时（configurable = false）。
-* Object.seal() 方法可以让一个对象密封，并返回被密封后的对象。密封对象是指那些不能添加新的属性，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性，但可能可以修改已有属性的值的对象。（configurable = false）
-* Object.freeze() 方法可以冻结一个对象。冻结对象是指那些不能添加新的属性，不能修改已有属性的值，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性的对象。也就是说，这个对象永远是不可变的。该方法返回被冻结的对象。（writeable和configurable都为false）
-
-        注意：上述提到的方法只是针对某个对象的，比如说冻结一个对象时，并不会影响对象的原型链，如果想对原型链做类似处理的话，可以通过Object.prototypeof（）的方法拿到对象的原型，一层层遍历，然后freeze
-* Object.isExtensible(obj)判断是否可扩展；Object.isSealed(obj)判断是否被隐藏；Object.isFrozen(obj)判断对象当前是否被冻结。
+	* 属性标签: writeable,enumerable,configurable,value,get/set方法。这些可以为属性提供访问权限的控制。
+	![属性标签限制](/imgs/2-propertylimit.jpg)
+	* Object.preventExtensions()让一个对象变的不可扩展，也就是永远不能再添加新的属性。但是要加上Object.seal(obj)才算是真正的限制修改、删除，此时（configurable = false）。
+	* Object.seal() 方法可以让一个对象密封，并返回被密封后的对象。密封对象是指那些不能添加新的属性，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性，但可能可以修改已有属性的值的对象。（configurable = false）
+	* Object.freeze() 方法可以冻结一个对象。冻结对象是指那些不能添加新的属性，不能修改已有属性的值，不能删除已有属性，以及不能修改已有属性的可枚举性、可配置性、可写性的对象。也就是说，这个对象永远是不可变的。该方法返回被冻结的对象。（writeable和configurable都为false）
+		> 注意：上述提到的方法只是针对某个对象的，比如说冻结一个对象时，并不会影响对象的原型链，如果想对原型链做类似处理的话，可以通过Object.prototypeof（）的方法拿到对象的原型，一层层遍历，然后freeze
+	* Object.isExtensible(obj)判断是否可扩展；Object.isSealed(obj)判断是否被隐藏；Object.isFrozen(obj)判断对象当前是否被冻结。
 
 1. this
     
-* 全局的this //this指向浏览器
-* 一般函数的this //this指向浏览器
-* 作为对象方法的函数的this //this指向对象
-* 对象原型链上的this //this指向对象本身
-* get/set方法中的this //指向对象本身
-* 构造器中的this
-    ```
-    function yy(){ this.a = 33;} var xx = new yy()
-    // this会指向空对象，并且空对象的原型指向一样yy();的prototype属性；当没有return或者return基本类型时，会返回this。如果是对象，则返回该对象。
-    ```
+	* 全局的this //this指向浏览器
+	* 一般函数的this //this指向浏览器
+	* 作为对象方法的函数的this //this指向对象
+	* 对象原型链上的this //this指向对象本身
+	* get/set方法中的this //指向对象本身
+	* 构造器中的this
 
-* apply,call
-    a.call(b,xx,xx)中this指向当前的作用域.这里a方法在b作用域中执行this指向b；
-* var g = f.bind({a:"test"}); //this指向bind的参数对象 {a:"test"}
+	    ```
+	    function yy(){ this.a = 33;} var xx = new yy()
+	    // this会指向空对象，并且空对象的原型指向一样yy();的prototype属性；当没有return或者return基本类型时，会返回this。如果是对象，则返回该对象。
+	    ```
+
+	* apply,call
+	    a.call(b,xx,xx)中this指向当前的作用域.这里a方法在b作用域中执行this指向b；
+	* var g = f.bind({a:"test"}); //this指向bind的参数对象 {a:"test"}
 
 1. 自执行函数
-> !function, +function, (function(){})();
-告诉浏览器自动运行这个匿名函数的，因为!+()这些符号的运算符是最高的，所以会先运行它们后面的函数
+	> !function, +function, (function(){})();
+	> 告诉浏览器自动运行这个匿名函数的，因为!+()这些符号的运算符是最高的，所以会先运行它们后面的函数
 
 1. 原型链
     ![原型链](/imgs/1-prototype.jpg)
@@ -180,38 +183,40 @@ number,string,boolean都有对应的包装类型。
         console.log(name);
     }).show().hide().show().hide().show();    
     ```
-1. 模块化
-> 模块化函数内部变量不会泄漏到全局作用域。
 
-* 定义立即执行函数
-moduleA = function(){}();
-* this 方法
-    ```
-    moduleA = new function(){
-        var prop = 1;
-        function func(){}
-        this.func = func;
-        this.prop = prop;
-    }
-    ```
+1. 模块化
+	> 模块化函数内部变量不会泄漏到全局作用域。
+
+	* 定义立即执行函数
+	moduleA = function(){}();
+	* this 方法
+
+	    ```
+	    moduleA = new function(){
+	        var prop = 1;
+	        function func(){}
+	        this.func = func;
+	        this.prop = prop;
+	    }
+	    ```
 
 1. 变量对象variable object(VO)
-**填充顺序:**
-* 函数参数（若未传入，初始化参数则为undefined）
-* 函数声明（若发生冲突，会覆盖）
-* 变量声明（初始化变量值为undefined若发生冲突则会忽略）
+	**填充顺序:**
+	* 函数参数（若未传入，初始化参数则为undefined）
+	* 函数声明（若发生冲突，会覆盖）
+	* 变量声明（初始化变量值为undefined若发生冲突则会忽略）
 
 ## 2016.2.20(待复盘)
 
-> 主要内容：
-1.HTTP请求过程
-2.浏览器渲染过程
-3.响应式设计
-4.跨域请求方法
-5.重排重绘
-6.移动端事件
-7.js回调
-8.图片格式对比
+> **主要内容：**
+	1. HTTP请求过程
+	2. 浏览器渲染过程
+	3. 响应式设计
+	4. 跨域请求方法
+	5. 重排重绘
+	6. 移动端事件
+	7. js回调
+	8. 图片格式对比
 
 ### **一、HTTP请求与浏览器渲染过程**
 
@@ -224,15 +229,15 @@ moduleA = function(){}();
 ### **二、响应式设计**
 
 1. 相关名词解释
-（1） 计量单位比较：em，rem，px
-（2） viewport
-（3） 分辨率与像素
-（4） PPI
+	（1） 计量单位比较：em，rem，px
+	（2） viewport
+	（3） 分辨率与像素
+	（4） PPI
 
 2. viewport
 
 3. 移动端事件
-touchstart touchmove tounchend
+	touchstart touchmove tounchend
 
 ### **三、js回调**
 
@@ -241,212 +246,227 @@ touchstart touchmove tounchend
 
 ## 2016.2.19
 
-> 主要内容：
-1.C语言基础
-2.C++基础
-3.使用github做博客
-4.Markdown语法
-5.css技巧
+> **主要内容：**
+	1. C语言基础
+	2. C++基础
+	3. 使用github做博客
+	4. Markdown语法
+	5. css技巧
 
 ### **一、css技巧**
 
 1. 雪碧图
-> 原理：使用CSS background和background-position属性渲染
+	> 原理：使用CSS background和background-position属性渲染
 
 2. 前端图片延迟加载的具体实现
-> 原理：先将图片的真实地址缓存在一个自定义的属性(lazy-src)中，而src地址使用一个全透明的占位图片来代替。
+	> 原理：先将图片的真实地址缓存在一个自定义的属性(lazy-src)中，而src地址使用一个全透明的占位图片来代替。
 
 3. 让所有浏览器支持元素透明效果
-		.trans{
-			opacity: .7;
-			/* IE8 */
-			-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
-			/* IE5-7 */
-			filter: alpha(opacity=70);
-		}
+	```
+	.trans{
+		opacity: .7;
+		/* IE8 */
+		-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+		/* IE5-7 */
+		filter: alpha(opacity=70);
+	}
+	```
 
 4. 巧用 :before和:after
-	+ 结合border写个对话框的样式
-	
-            <style>
-            .test-div{
-                position: relative;  /*日常相对定位*/
-                width:150px;
-                height: 36px;
-                border:black 1px solid;
-                border-radius:5px;
-                background: rgba(245,245,245,1)
-            }
-            .test-div:before,.test-div:after{
-                content: "";  /*:before和:after必带技能，重要性为满5颗星*/
-                display: block;
-                position: absolute;  /*日常绝对定位*/
-                top:8px;
-                width: 0;
-                height: 0;
-                border:6px transparent solid;
-            }
-            .test-div:before{
-                left:-11px;
-                border-right-color: rgba(245,245,245,1);
-                z-index:1
-            }
-            .test-div:after{
-                left:-12px;
-                border-right-color: rgba(0,0,0,1);
-                z-index: 0
-            }
-            </style>
-            <div class="test-div"></div>
+	* 结合border写个对话框的样式
 
-	+ 作为内容的半透明背景层
-	
-            <style>
-                  body{
-                      background: url(img/1.jpg) no-repeat left top /*这里本兽加了个图片背景，用以区分背景的半透明及内容的完全不透明*/
-                  }
-                  .test-div{
-                      position: relative;  /*日常相对定位(重要，下面内容也会介绍)*/
-                      width:300px;
-                      height: 120px;
-                      padding: 20px 10px;
-                      font-weight: bold;
-                  }
-                  .test-div:before{
-                      position: absolute;  /*日常绝对定位(重要，下面内容也会略带介绍)*/
-                      content: "";  /*:before和:after必带技能，重要性为满5颗星*/
-                      top:0;
-                      left: 0;
-                      width: 100%;  /*和内容一样的宽度*/
-                      height: 100%;  /*和内容一样的高度*/
-                      background: rgba(255,255,255,.5); /*给定背景白色，透明度50%*/
-                      z-index:-1 /*日常元素堆叠顺序(重要，下面内容也会略带介绍)*/
-                  }
-              </style>
+		```
+	    <style>
+	    .test-div{
+	        position: relative;  /*日常相对定位*/
+	        width:150px;
+	        height: 36px;
+	        border:black 1px solid;
+	        border-radius:5px;
+	        background: rgba(245,245,245,1)
+	    }
+	    .test-div:before,.test-div:after{
+	        content: "";  /*:before和:after必带技能，重要性为满5颗星*/
+	        display: block;
+	        position: absolute;  /*日常绝对定位*/
+	        top:8px;
+	        width: 0;
+	        height: 0;
+	        border:6px transparent solid;
+	    }
+	    .test-div:before{
+	        left:-11px;
+	        border-right-color: rgba(245,245,245,1);
+	        z-index:1
+	    }
+	    .test-div:after{
+	        left:-12px;
+	        border-right-color: rgba(0,0,0,1);
+	        z-index: 0
+	    }
+	    </style>
+	    <div class="test-div"></div>
+	    ```
+
+	* 作为内容的半透明背景层
+
+		```
+	    <style>
+          body{
+              background: url(img/1.jpg) no-repeat left top /*这里本兽加了个图片背景，用以区分背景的半透明及内容的完全不透明*/
+          }
+          .test-div{
+              position: relative;  /*日常相对定位(重要，下面内容也会介绍)*/
+              width:300px;
+              height: 120px;
+              padding: 20px 10px;
+              font-weight: bold;
+          }
+          .test-div:before{
+              position: absolute;  /*日常绝对定位(重要，下面内容也会略带介绍)*/
+              content: "";  /*:before和:after必带技能，重要性为满5颗星*/
+              top:0;
+              left: 0;
+              width: 100%;  /*和内容一样的宽度*/
+              height: 100%;  /*和内容一样的高度*/
+              background: rgba(255,255,255,.5); /*给定背景白色，透明度50%*/
+              z-index:-1 /*日常元素堆叠顺序(重要，下面内容也会略带介绍)*/
+          }
+      	</style>
+	    ```
 
 5. 多行文本溢出显示省略号(…)全攻略
-	+ WebKit浏览器或移动端的页面
+	* WebKit浏览器或移动端的页面
 
-			overflow : hidden;
-			text-overflow: ellipsis;
-			display: -webkit-box;
-			-webkit-line-clamp: 2;
-			-webkit-box-orient: vertical;
+		```
+		overflow : hidden;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		```
 
-	+ 跨浏览器兼容的方案
+	* 跨浏览器兼容的方案
 
-			p {
-			    position:relative;
-			    line-height:1.4em;
-			    /* 3 times the line-height to show 3 lines */
-			    height:4.2em;
-			    overflow:hidden;
-			}
-			p::after {
-			    content:"...";
-			    font-weight:bold;
-			    position:absolute;
-			    bottom:0;
-			    right:0;
-			    padding:0 20px 1px 45px;
-			    background:url(http://www.css88.com/wp-content/uploads/2014/09/ellipsis_bg.png) repeat-y;
-			}
-
+		```
+		p {
+		    position:relative;
+		    line-height:1.4em;
+		    /* 3 times the line-height to show 3 lines */
+		    height:4.2em;
+		    overflow:hidden;
+		}
+		p::after {
+		    content:"...";
+		    font-weight:bold;
+		    position:absolute;
+		    bottom:0;
+		    right:0;
+		    padding:0 20px 1px 45px;
+		    background:url(http://www.css88.com/wp-content/uploads/2014/09/ellipsis_bg.png) repeat-y;
+		}
+		```
 
 ### **二、快速排序js实现**
-
-	var quickSort = function(arr) {
-	　　if (arr.length <= 1) { return arr; }
-	　　var pivotIndex = Math.floor(arr.length / 2);
-	　　var pivot = arr.splice(pivotIndex, 1)[0];
-	　　var left = [];
-	　　var right = [];
-	　　for (var i = 0; i < arr.length; i++){
-	　　　　if (arr[i] < pivot) {
-	　　　　　　left.push(arr[i]);
-	　　　　} else {
-	　　　　　　right.push(arr[i]);
-	　　　　}
-	　　}
-	　　return quickSort(left).concat([pivot], quickSort(right));
-	};
+```
+var quickSort = function(arr) {
+　　if (arr.length <= 1) { return arr; }
+　　var pivotIndex = Math.floor(arr.length / 2);
+　　var pivot = arr.splice(pivotIndex, 1)[0];
+　　var left = [];
+　　var right = [];
+　　for (var i = 0; i < arr.length; i++){
+　　　　if (arr[i] < pivot) {
+　　　　　　left.push(arr[i]);
+　　　　} else {
+　　　　　　right.push(arr[i]);
+　　　　}
+　　}
+　　return quickSort(left).concat([pivot], quickSort(right));
+};
+```
 
 ### **三、Markdown语法**
 
->**Markdown 官方文档：**
-[创始人 John Gruber 的 Markdown 语法说明](http://daringfireball.net/projects/markdown/syntax)
-[Markdown 中文版语法说明](http://wowubuntu.com/markdown/#list)
+> **Markdown 官方文档：**
+> [创始人 John Gruber 的 Markdown 语法说明](http://daringfireball.net/projects/markdown/syntax)
+> [Markdown 中文版语法说明](http://wowubuntu.com/markdown/#list)
 
 1. 标题设置（让字体变大，和word的标题意思一样）
-+ 通过在文字下方添加`=`和`-`，他们分别表示一级标题和二级标题。
-+ 在文字开头加上`#`，通过`#`数量表示几级标题。（一共只有1~6级标题，1级标题字体最大）
+	* 通过在文字下方添加`=`和`-`，他们分别表示一级标题和二级标题。
+	* 在文字开头加上`#`，通过`#`数量表示几级标题。（一共只有1~6级标题，1级标题字体最大）
 
 2. 块注释（blockquote）
-通过在文字开头添加`>`表示块注释。（当`>`和文字之间添加五个blank时，块注释的文字会有变化。）
+	通过在文字开头添加`>`表示块注释。（当`>`和文字之间添加五个blank时，块注释的文字会有变化。）
 
 3. 斜体
-将需要设置为斜体的文字两端使用1个`*`或者`_`夹起来
+	将需要设置为斜体的文字两端使用1个`*`或者`_`夹起来
 
 4. 粗体
-将需要设置为斜体的文字两端使用2个`*`或者`_`夹起来
+	将需要设置为斜体的文字两端使用2个`*`或者`_`夹起来
 
 5. 无序列表
-在文字开头添加(`*`, `+`, and -)实现无序列表。但是要注意在(`*`, `+`, and `-`)和文字之间需要添加空格。（建议：一个文档中只是用一种无序列表的表示方式）
+	在文字开头添加(`*`, `+`, and -)实现无序列表。但是要注意在(`*`, `+`, and `-`)和文字之间需要添加空格。（建议：一个文档中只是用一种无序列表的表示方式）
 
 6. 有序列表
-使用数字后面跟上句号。（还要有空格）
+	使用数字后面跟上句号。（还要有空格）
 
 7. 链接（Links）
-+ 内联方式：`This is an [example link](http://example.com/)`.
-+ 引用方式：
+	* 内联方式：`This is an [example link](http://example.com/)`.
+	* 引用方式：
 
-            I get 10 times more traffic from [Google][1] than from [Yahoo][2] or [MSN][3].  
-            
-            [1]: http://google.com/        "Google" 
-            [2]: http://search.yahoo.com/  "Yahoo Search" 
-            [3]: http://search.msn.com/    "MSN Search"
- 
+		```
+        I get 10 times more traffic from [Google][1] than from [Yahoo][2] or [MSN][3].  
+        
+        [1]: http://google.com/        "Google" 
+        [2]: http://search.yahoo.com/  "Yahoo Search" 
+        [3]: http://search.msn.com/    "MSN Search"
+		```
+
 8. 图片（Images）
-+ 内联方式：`![alt text](/path/to/img.jpg "Title")`
-+ 引用方式：
+	* 内联方式：`![alt text](/path/to/img.jpg "Title")`
+	* 引用方式：
 
-            ![alt text][id] 
-            [id]: /path/to/img.jpg "Title"
+		```
+        ![alt text][id] 
+        [id]: /path/to/img.jpg "Title"
+        ```
 
 9. 代码（HTML中所谓的Code）
-+ 简单文字出现一个代码框。使用\`&lt;blockquote\&gt;\`。（\`不是单引号而是左上角的ESC下面~中的\`）
-+ 大片文字需要实现代码框。使用Tab和四个空格。
+	* 简单文字出现一个代码框。使用\`&lt;blockquote\&gt;\`。（\`不是单引号而是左上角的ESC下面~中的\`）
+	* 大片文字需要实现代码框。使用Tab和四个空格。
 
 10. 脚注（footnote）
-
-        hello[^hello]
-        [^hello]: hi
+	```
+    hello[^hello]
+    [^hello]: hi
+    ```
 
 11. 下划线
-在空白行下方添加三条`-`横线。（前面讲过在文字下方添加`-`，实现的2级标题）
+	在空白行下方添加三条`-`横线。（前面讲过在文字下方添加`-`，实现的2级标题）
 
 
 ## 2016.2.18
 
-> 主要内容：   
-1. Git([廖雪峰Git教程](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000))
-2. ajax  
-3. PS切图
-4. [JavaScript秘密花园](https://bonsaiden.github.io/JavaScript-Garden/zh/)
+> **主要内容：**   
+	1. Git([廖雪峰Git教程](http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000))
+	2. ajax  
+	3. PS切图
+	4. [JavaScript秘密花园](https://bonsaiden.github.io/JavaScript-Garden/zh/)
 
 
 ## 2016.2.17
 
-> 主要内容：   
-1. 正则表达式  
-2. 页面布局  
-3. jquery-ui
-4. jquery-mobile
+> **主要内容：**   
+	1. 正则表达式  
+	2. 页面布局  
+	3. jquery-ui
+	4. jquery-mobile
 
 ### **一、正则表达式**
 
 1. 使用
-	>/正则表达式/ 或 new RegExp("正则表达式")
+	> /正则表达式/ 或 new RegExp("正则表达式")
 
 2. 基本元素
 	* . 任意字符(除换行符)
@@ -481,6 +501,7 @@ touchstart touchmove tounchend
 	* 非贪婪算法（匹配尽可能少次）
 		* x*? 同x*
 		* x+? 同x+
+
 7. 3个flag
 	* global 匹配所有，不使用匹配到第一个就会停
 	* ignoreCase 不区分大小写
@@ -498,119 +519,135 @@ touchstart touchmove tounchend
 
 ### **二、CSS居中实现完整攻略**
 
-+ 水平居中：行内元素解决方案
->只需要把行内元素包裹在一个属性display为block的父层元素中，并且把父层元素添加如下属性即可：
+1. 水平居中：行内元素解决方案
+	只需要把行内元素包裹在一个属性display为block的父层元素中，并且把父层元素添加如下属性即可：
+	```
+	.parent {
+	    text-align:center;
+	}
+	```
 
-		.parent {
-		    text-align:center;
-		}
+1. 水平居中：块状元素解决方案
+	```
+	.item {
+	    /* 这里可以设置顶端外边距 */
+	    margin: 10px auto;
+	}
+	```
 	
-+ 水平居中：块状元素解决方案
+1. 水平居中：多个块状元素解决方案
+	将元素的display属性设置为inline-block，并且把父元素的text-align属性设置为center即可:
 
-		.item {
-		    /* 这里可以设置顶端外边距 */
-		    margin: 10px auto;
-		}
-	
-+ 水平居中：多个块状元素解决方案
-> 将元素的display属性设置为inline-block，并且把父元素的text-align属性设置为center即可:
+	```
+	.parent {
+	    text-align:center;
+	}
+	```	
 
-			.parent {
-			    text-align:center;
-			}
-			
-+ 水平居中：多个块状元素解决方案 (使用flexbox布局实现)
-> 使用flexbox布局，只需要把待处理的块状元素的父元素添加属性display:flex及justify-content:center即可:
+1. 水平居中：多个块状元素解决方案 (使用flexbox布局实现)
+	使用flexbox布局，只需要把待处理的块状元素的父元素添加属性display:flex及justify-content:center即可:
 
-		.parent {
-		    display:flex;
-		    justify-content:center;
-		}
+	```
+	.parent {
+	    display:flex;
+	    justify-content:center;
+	}
+	```
 
-+ 垂直居中：单行的行内元素解决方案
+1. 垂直居中：单行的行内元素解决方案
+	```
+	.parent {
+	    background: #222;
+	    height: 200px;
+	}
 
-		.parent {
-		    background: #222;
-		    height: 200px;
-		}
+     /* 以下代码中，将a元素的height和line-height设置的和父元素一样高度即可实现垂直居中 */
+	a {
+	    height: 200px;
+	    line-height:200px; 
+	    color: #FFF;
+	}
+	```
 
-         /* 以下代码中，将a元素的height和line-height设置的和父元素一样高度即可实现垂直居中 */
-		a {
-		    height: 200px;
-		    line-height:200px; 
-		    color: #FFF;
-		}
-+ 垂直居中：多行的行内元素解决方案
-> 组合使用display:table-cell和vertical-align:middle属性来定义需要居中的元素的父容器元素生成效果，如下：
+1. 垂直居中：多行的行内元素解决方案
+	组合使用display:table-cell和vertical-align:middle属性来定义需要居中的元素的父容器元素生成效果，如下：
 
-		.parent {
-		    background: #222;
-		    width: 300px;
-		    height: 300px;
-		    /* 以下属性垂直居中 */
-		    display: table-cell;
-		    vertical-align:middle;
-		}
+	```
+	.parent {
+	    background: #222;
+	    width: 300px;
+	    height: 300px;
+	    /* 以下属性垂直居中 */
+	    display: table-cell;
+	    vertical-align:middle;
+	}
+	```
+
+1. 垂直居中：已知高度的块状元素解决方案
+	```
+	.item{
+	    top: 50%;
+	    margin-top: -50px;  /* margin-top值为自身高度的一半 */
+	    position: absolute;
+	    padding:0;
+	}
+	```
+
+1. 垂直居中：未知高度的块状元素解决方案
+	```
+	.item{
+	    top: 50%;
+	    position: absolute;
+	    transform: translateY(-50%);  /* 使用css3的transform来实现 */
+	}
+	```
 		
-+ 垂直居中：已知高度的块状元素解决方案
-
-		.item{
-		    top: 50%;
-		    margin-top: -50px;  /* margin-top值为自身高度的一半 */
-		    position: absolute;
-		    padding:0;
-		}
-
-+ 垂直居中：未知高度的块状元素解决方案
-
-		.item{
-		    top: 50%;
-		    position: absolute;
-		    transform: translateY(-50%);  /* 使用css3的transform来实现 */
-		}
+1. 水平垂直居中：已知高度和宽度的元素解决方案1
+	这是一种不常见的居中方法，可自适应，比方案2更智能，如下：
+	```
+	.item{
+	    position: absolute;
+	    margin:auto;
+	    left:0;
+	    top:0;
+	    right:0;
+	    bottom:0;
+	}
+	```
 		
-+ 水平垂直居中：已知高度和宽度的元素解决方案1
-这是一种不常见的居中方法，可自适应，比方案2更智能，如下：
+1. 水平垂直居中：已知高度和宽度的元素解决方案2
+	```
+	.item{
+	    position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    margin-top: -75px;  /* 设置margin-left / margin-top 为自身高度的一半 */
+	    margin-left: -75px;
+	}
+	```
 
-		.item{
-		    position: absolute;
-		    margin:auto;
-		    left:0;
-		    top:0;
-		    right:0;
-		    bottom:0;
-		}
-		
-+ 水平垂直居中：已知高度和宽度的元素解决方案2
+1. 水平垂直居中：未知高度和宽度元素解决方案
+	```
+	.item{
+	    position: absolute;
+	    top: 50%;
+	    left: 50%;
+	    transform: translate(-50%, -50%);  /* 使用css3的transform来实现 */
+	}
+	```	
 
-		.item{
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    margin-top: -75px;  /* 设置margin-left / margin-top 为自身高度的一半 */
-		    margin-left: -75px;
-		}
-		
-+ 水平垂直居中：未知高度和宽度元素解决方案
+1. 水平垂直居中：使用flex布局实现
+	```
+	.parent{
+	    display: flex;
+	    justify-content:center;
+	    align-items: center;
+	    /* 注意这里需要设置高度来查看垂直居中效果 */
+	    background: #AAA;
+	    height: 300px;
+	}
+	```
 
-		.item{
-		    position: absolute;
-		    top: 50%;
-		    left: 50%;
-		    transform: translate(-50%, -50%);  /* 使用css3的transform来实现 */
-		}
-		
-+ 水平垂直居中：使用flex布局实现
-
-		.parent{
-		    display: flex;
-		    justify-content:center;
-		    align-items: center;
-		    /* 注意这里需要设置高度来查看垂直居中效果 */
-		    background: #AAA;
-		    height: 300px;
-		}
-		
 ### **三、弹性布局**
 
 > 可参考[阮一峰的网络日志——Flex 布局教程：语法篇](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html?utm_source=tuicool)
@@ -618,10 +655,10 @@ touchstart touchmove tounchend
 
 ## 2016.2.16
 
-> 主要内容：   
-1. html基础  
-2. css基础  
-3. 《JavaScript高级程序设计》1-5章
+> **主要内容：**
+	1. html基础  
+	2. css基础  
+	3. 《JavaScript高级程序设计》1-5章
 
 ### **一、html**
 
@@ -676,7 +713,7 @@ touchstart touchmove tounchend
 	+ 复杂数据类型：object
 
 2. 转换为false的值
-	>false,""(空字符串)，0和NaN，null，undefined
+	> false,""(空字符串)，0和NaN，null，undefined
 
 3. 结果为NaN的运算
 	+ 0/0
@@ -739,7 +776,7 @@ touchstart touchmove tounchend
 		+ map(fun)：对数组中的每一项运行给定函数，返回每次调用的结果组成的数组。
 		+ some(fun)：对数组中的每一项运行给定函数，如果函数对任一项返回true，则返回true。
 		+ forEach(fun)：对数组中的每一项运行给定函数，无返回值。
-	13. reduce(callback[, initialValue])：归并方法
+		+ reduce(callback[, initialValue])：归并方法
 
 8. 函数：函数是对象，函数名是指针
 
