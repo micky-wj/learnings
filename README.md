@@ -130,6 +130,16 @@ number,string,boolean都有对应的包装类型。
 
 1. 原型链
     ![原型链](/imgs/1-prototype.jpg)
+    ![原型链举例函数](/imgs/4-protoexample.jpg)
+    注：并不是所有的对象的原型链上都有Object.prototype
+	```
+	//第一种
+	var obj2 = Object.create(null);
+	obj2.toString(); //undefined
+	//第二种
+	var bined = abc.bind(null);//bind修改运行时的this
+	bined.prototype;//undefined bind没有prototype属性
+	```
 
 1. bind方法模拟
     ![bind方法模拟](/imgs/3-bind.jpg)
@@ -185,6 +195,11 @@ moduleA = function(){}();
     }
     ```
 
+1. 变量对象variable object(VO)
+**填充顺序:**
+* 函数参数（若未传入，初始化参数则为undefined）
+* 函数声明（若发生冲突，会覆盖）
+* 变量声明（初始化变量值为undefined若发生冲突则会忽略）
 
 ## 2016.2.20(待复盘)
 
