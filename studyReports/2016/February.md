@@ -30,15 +30,477 @@
 	2. 屏幕尺寸，分辨率，像素，PPI
 
 
-## 2016.2.25（待复盘）
+## 2016.2.25
 
 > **主要内容：**
-	1. CSS代码重构与优化
-	2. 巧用margin/padding的百分比值实现高度自适应
-	3. CSS 小技巧
+	1. 巧用margin/padding的百分比值实现高度自适应
+	2. CSS 小技巧
+	
+### **一、巧用margin/padding的百分比值实现高度自适应**
+> css知识点：当margin/padding取形式为百分比的值时，无论是left/right，还是top/bottom，都是以父元素的width为参照物的！
+优化方案是这样的：给容器设置padding-top/padding-bottom跟width一致的值（百分比）
+
+```
+#container {
+    width: 50%;
+    position: relative;
+    background-color: red;
+    overflow: hidden; //需要触发BFC消除margin折叠的问题
+}
+.placeholder:after {
+    content: '';
+    display: block;
+    margin-top: 100%; //margin 百分比相对父元素宽度计算
+} 
+img {
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+```
+
+### **二、CSS 小技巧**
+
+1. 使用:not()添加/去除导航上不需要的边框
+
+    ```
+    .nav li:not(:last-child) {
+         border-right: 1px solid #666;
+    }
+    ```
+
+2. 为body添加行高：文本元素可以很容易从body继承
+
+    ```
+    body {
+         line-height: 1;
+    }
+    ```
+
+3. 垂直居中任何元素
+
+    ```
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+     
+    body {
+      -webkit-align-items: center;  
+      -ms-flex-align: center;  
+      align-items: center;
+      display: -webkit-flex;
+      display: flex;
+    }
+    ```
+
+4. 逗号分离的列表
+
+    ```
+    ul > li:not(:last-child)::after {
+      content: ",";
+    }
+    ```
+
+5. 使用负 nth-child 选择元素
+
+    ``` 
+    /* 选择1到3的元素并显示 */
+    li:nth-child(-n+3) { 
+       display: block;
+    }
+    ```
+
+6. 继承box-sizing
+
+    ```
+    html {
+      box-sizing: border-box;
+    }
+     
+    , :before, *:after {
+      box-sizing: inherit;
+    }
+    ```
+
+7. 表格单元格等宽
+
+    ```
+    .calendar {
+      table-layout: fixed;
+    }
+    ```
+
+8. 使用属性选择器选择空链接
+
+    ```
+    a[href^="http"]:empty::before {
+      content: attr(href);
+    }
 
 
 
+## 2016.2.24
+
+> **主要内容：**
+	1. 30行代码实现Javascript中的MVC
+	2. 17行代码实现的简易Javascript字符串模板
+	3. 优雅的数组降维——Javascript中apply方法的妙用
+	
+### **一、30行代码实现Javascript中的MVC**
+
+**(一) 什么是MVC：** MVC模式是软件工程中一种软件架构模式，一般把软件模式分为三部分，模型(Model)+视图(View)+控制器(Controller)
+
+* **模型：**模型用于封装与应用程序的业务逻辑相关的数据以及对数据处理的方法。模型有对数据直接访问的权利。模型不依赖 “视图” 和 “控制器”, 也就是说模型它不关心页面如何显示及如何被操作.
+* **视图：**视图层最主要的是监听模型层上的数据改变，并且实时的更新html页面。当然也包括一些事件的注册或者ajax请求操作(发布事件),都是放在视图层来完成。
+* **控制器：**控制器接收用户的操作，最主要是订阅视图层的事件，然后调用模型或视图去完成用户的操作;比如：当页面上触发一个事件，控制器不输出任何东西及对页面做任何处理;它只是接收请求并决定调用模型中的那个方法去处理请求,然后再确定调用那个视图中的方法来显示返回的数据。
+
+**(二)  代码实现**
+
+1. MVC的基础是观察者模式，这是实现model和view同步的关键
+    > 为了简单起见，每个model实例中只包含一个primitive value值。
+
+    ```
+    function Model(value) {
+        this._value = typeof value === 'undefined' ? '' : value;
+        this._listeners = [];
+    }
+    Model.prototype.set = function (value) {
+        var self = this;
+        self._value = value;
+        // model中的值改变时，应通知注册过的回调函数
+        // 按照Javascript事件处理的一般机制，我们异步地调用回调函数
+        // 如果觉得setTimeout影响性能，也可以采用requestAnimationFrame
+        setTimeout(function () {
+            self._listeners.forEach(function (listener) {
+                listener.call(self, value);
+            });
+        });
+    };
+    Model.prototype.watch = function (listener) {
+        // 注册监听的回调函数
+        this._listeners.push(listener);
+    };
+    
+    
+    // html代码：
+    <div id="div1"></div>
+    // 逻辑代码：
+    (function () {
+        var model = new Model();
+        var div1 = document.getElementById('div1');
+        model.watch(function (value) {
+            div1.innerHTML = value;
+        });
+        model.set('hello, this is a div');
+    })();
+    ```
+
+    借助观察者模式，我们已经实现了在调用model的set方法改变其值的时候，模板也同步更新，但这样的实现却很别扭，因为我们需要手动监听model值的改变（通过watch方法）并传入一个回调函数，有没有办法让view（一个或多个dom node）和model更简单的绑定呢？
+
+2. 实现bind方法，绑定model和view
+
+    ```
+    Model.prototype.bind = function (node) {
+        // 将watch的逻辑和通用的回调函数放到这里
+        this.watch(function (value) {
+            node.innerHTML = value;
+        });
+    };
+    
+    
+    // html代码：
+    <div id="div1"></div>
+    <div id="div2"></div>
+    // 逻辑代码：
+    (function () {
+        var model = new Model();
+        model.bind(document.getElementById('div1'));
+        model.bind(document.getElementById('div2'));
+        model.set('this is a div');
+    })();
+    ```
+
+    通过一个简单的封装，view和model之间的绑定已经初见雏形，即使需要在一个model上绑定多个view，实现起来也很轻松。注意bind是Function类prototype上的一个原生方法，不过它和MVC的关系并不紧密，笔者又实在太喜欢bind这个单词，一语中的，言简意赅，所以索性在这里把原生方法覆盖了，大家可以忽略。言归正传，虽然绑定的复杂度降低了，这一步依然要依赖我们手动完成，有没有可能把绑定的逻辑从业务代码中彻底解耦呢？
+
+3. 实现controller，将绑定从逻辑代码中解耦
+    细心的朋友可能已经注意到，虽然讲的是MVC，但是上文中却只出现了Model类，View类不出现可以理解，毕竟HTML就是现成的View（事实上本文中从始至终也只是利用HTML作为View，javascript代码中并没有出现过View类），那Controller类为何也隐身了呢？别急，其实所谓的”逻辑代码”就是一个框架逻辑（姑且将本文的原型玩具称之为框架）和业务逻辑耦合度很高的代码段，现在我们就来将它分解一下。
+
+    如果要将绑定的逻辑交给框架完成，那么就需要告诉框架如何来完成绑定。由于JS中较难完成annotation（注解），我们可以在view中做这层标记——使用html的标签属性就是一个简单有效的办法。
+
+    ```
+    function Controller(callback) {
+        var models = {};
+        // 找到所有有bind属性的元素
+        var views = document.querySelectorAll('[bind]');
+        // 将views处理为普通数组
+        views = Array.prototype.slice.call(views, 0);
+        views.forEach(function (view) {
+            var modelName = view.getAttribute('bind');
+            // 取出或新建该元素所绑定的model
+            models[modelName] = models[modelName] || new Model();
+            // 完成该元素和指定model的绑定
+            models[modelName].bind(view);
+        });
+        // 调用controller的具体逻辑，将models传入，方便业务处理
+        callback.call(this, models);
+    }
+    
+    
+    // html:
+    <div id="div1" bind="model1"></div>
+    <div id="div2" bind="model1"></div>
+    // 逻辑代码：
+    new Controller(function (models) {
+        var model1 = models.model1;
+        model1.set('this is a div');
+    });
+    ```
+
+    就这么简单吗？就这么简单：在Controller中完成业务逻辑并对Model进行修改，Model的变化触发View的自动更新，怎么样，算得上一个有模有样的MVC吧？当然，这样的”框架”还不足以用于生产环境，不过如果它能或多或少地帮助到大家对于MVC的理解的话，博主就非常满足了。
+
+    整理后去掉注释的”框架”代码：
+
+    ```
+    function Model(value) {
+        this._value = typeof value === 'undefined' ? '' : value;
+        this._listeners = [];
+    }
+    Model.prototype.set = function (value) {
+        var self = this;
+        self._value = value;
+        setTimeout(function () {
+            self._listeners.forEach(function (listener) {
+                listener.call(self, value);
+            });
+        });
+    };
+    Model.prototype.watch = function (listener) {
+        this._listeners.push(listener);
+    };
+    Model.prototype.bind = function (node) {
+        this.watch(function (value) {
+            node.innerHTML = value;
+        });
+    };
+    function Controller(callback) {
+        var models = {};
+        var views = Array.prototype.slice.call(document.querySelectorAll('[bind]'), 0);
+        views.forEach(function (view) {
+            var modelName = view.getAttribute('bind');
+            (models[modelName] = models[modelName] || new Model()).bind(view);
+        });
+        callback.call(this, models);
+    }
+    ```
+
+4. 一个简单的例子
+    下面请大家看一个简单例子，如何实现电子表
+
+    ```  
+    // html:
+    <span bind="hour"></span> : <span bind="minute"></span> : <span bind="second"></span>
+    // controller:
+    new Controller(function (models) {
+        function setTime() {
+            var date = new Date();
+            models.hour.set(date.getHours());
+            models.minute.set(date.getMinutes());
+            models.second.set(date.getSeconds());
+        }
+        setTime();
+        setInterval(setTime, 1000);
+    });
+    ```
+
+    可以看出，controller中只负责更新model的逻辑，和view完全解耦；而view和model的绑定是通过view中的属性和框架中controller的初始化代码完成的，也没有出现在业务逻辑中；至于view的更新，也是通过框架中的观察者模式实现的。
+
+### **二、17行代码实现的简易Javascript字符串模板**
+
+**例子：**
+
+```
+render('My name is {name}'， {
+  name: 'hsfzxjy'
+}); // My name is hsfzxjy
+ 
+render('I am in {profile.location}', {
+  name: 'hsfzxjy',
+  profile: {
+    location: 'Guangzhou'
+  }
+}); // I am in Guangzhou
+ 
+render('{ greeting }. \\{ This block will not be rendered }', {
+  greeting: 'Hi'
+}); // Hi. { This block will not be rendered }
+```
+
+**代码：**
+
+```
+function render(template, context) {
+  var tokenReg = /(\\)?\{([^\{\}\\]+)(\\)?\}/g;
+  return template.replace(tokenReg, function (word, slash1, token, slash2) {
+    if (slash1 || slash2) { 
+      return word.replace('\\', ''); // 如果分隔符被转义，则不渲染
+    }
+    var variables = token.replace(/\s/g, '').split('.');
+    var currentObject = context;
+    var i, length, variable;
+    for (i = 0, length = variables.length, variable = variables[i]; i < length; ++i) {
+      currentObject = currentObject[variable];
+      if (currentObject === undefined || currentObject === null) 
+        return '';
+    }
+    return currentObject;
+  })
+}
+```
+
+
+### **三、优雅的数组降维——Javascript中apply方法的妙用**
+
+```
+function reduceDimension(arr) {
+    return Array.prototype.concat.apply([], arr);
+}
+```
+
+
+## 2016.2.23
+
+> **主要内容：**
+	1. 前端图片选择
+	2. js运算符中的一些小技巧
+	
+### **一、前端图片选择**
+
+1. 关于jpg
+    由于其可压缩的特点，对于背景颜色较为复杂（比如照片等图）并且没有透明的图片，建议采用jpg。这样在保证了图片肉眼几乎看不出很大区别的情况下，把图片压得更小，压缩更快。不过对于有线条及文字的内容，不推荐用jpg。
+1. 关于gif
+    如果需要动图的话，由于APNG对兼容性对不友好gif依然还是首选。
+1. 关于png
+    * png8+alpha可以加入日常的开发中。对于桌面端，在不用考虑ie6的情况下，alpha透明的png8可以用在一些图片颜色较为简单的地方。对于移动端，可以考虑直接采用alpha透明的png8，而不采用png32，因为移动端的网络相较pc端较差，因此，采用png8+alpha可以节省流量。
+	* png32在桌面端中，还是可以作为主要的图片格式。因为桌面端相较于移动端，网速更友好，同时，显示器的浏览对于图片的精细程度要求更高，因此，一些比较复杂的按钮，logo还是应当采用png32来处理
+	* png8+索引透明可以用来处理桌面端对于低版本浏览器的（ie6）的兼容问题，虽然采用背景杂边的方式只能解决部分锯齿问题，但总好过于无。ie6已然是很早之前的浏览器，本身对其的兼容就势必会牺牲一些东西。因此，个人感觉还是对于背景简单的，直接采用杂边的方式来解决，而对于背景较为复杂的，目前我也只能想到采用去掉杂边的方法去解决（其实也就是说锯齿直接不管了）。
+
+### **二、js运算符中的一些小技巧**
+
+1. %取余运算符：运算结果的正负号由第一个运算子的正负号决定
+2. +运算符：当运算子中出现对象的时候，先调用该对象的valueOf方法。如果返回结果为原始类型的值，则转换为字符串；否则继续调用该对象的toString方法，然后转换为字符串。此外，当+运算符作为数值运算符放在其他值前面的时候，可以用于将任何值转为数值。
+
+    ```
+    var now = new Date();
+    typeof (now + 1) // "string"
+    typeof (now - 1) // "number"
+    
+    1 + [1,2]
+    // "11,2"
+    1 + {a:1}
+    // "1[object Object]"
+    
+    {a:1} + 1  // 1
+    ({a:1})+1  //"[object Object]1"
+    //解释：{a:1}被当做了代码块处理，而这个代码块没有返回值，所以整个表达式就返回1了。但是放在了圆括号中的{a:1}，因为js预期()中是一个值，所以它就又被当做对象处理了。
+    
+    [] + [] // ""
+    [] + {} // "[object Object]"
+    {} + [] // 0  解释：{}被视作代码块省略，+[]就是将[]转换为数值的意思了得到0.
+    {} + {} // NaN
+    
+    ({}) + {} // "[object Object][object Object]"
+    ({} + {}) // "[object Object][object Object]"
+    
+    //
+    +true // 1
+    +[] // 0
+    +{} // NaN
+    ```
+
+3. ！取反运算符：!!x等同于Boolean(x)
+    注：!!null 值是 false，其他的 object !!obj 值都是 true。
+4. ~否运算符：~~x能够对小数取整，并且这是取整方法中最快的一种。
+5. ^异或运算符：两次异或运算交换两个数的值
+
+    ```
+    var a = 10;
+    var b = 99;
+    
+    a^=b, b^=a, a^=b;
+    
+    a // 99
+    b // 10
+    ```
+
+6. << 左移运算符：<< 0可用于取整
+7. >> 右移运算符：可以模拟2的整除运算
+    
+    ```
+    5 >> 1 
+    // 相当于 5 / 2 = 2
+    
+    21 >> 2 
+    // 相当于 21 / 4 = 5
+    
+    21 >> 3 
+    // 相当于 21 / 8 = 2
+    
+    21 >> 4 
+    // 相当于 21 / 16 = 1
+    ```
+
+8. void运算符的作用是用来执行一个表达式，然后返回undefined，而且它的运算符优先级也比较高void 4+7 实际上等同于 (void 4) +7。
+9. 一般运算符是左结合的，但是=和三目运算符？：却是右结合的
+
+    ```
+    w = x = y = z;
+    q = a?b:c?d:e?f:g;
+    //相当于：
+    w = (x = (y = z)); 
+    q = a?b:(c?d:(e?f:g));
+    ```
+
+
+## 2016.2.22
+
+> **主要内容：**
+	1. IE和firefox浏览器的event事件兼容性汇总
+	2. 一道常被人轻视的前端JS面试题
+	
+### **一、IE和firefox浏览器的event事件兼容性汇总**
+
+* IE中可以直接使用event对象，但是Mozilla不可以直接使用。
+* 事件来源：event.target[Moz]与event.srcElement[IE]，但后者是返回一个Html Element
+* 键盘值的取得：event.which[Moz]与event.keyCode[IE]
+* 鼠标点击的绝对位置：event.pageX,event.pageY[Moz]与event.x,event.y[IE]
+* 鼠标点击的相对位置：event.layerX,event.layerY[Moz]与event.offsetX,event.offsetY[IE]
+* 事件绑定：addEventListener，removeEventListener[Moz]与attachEvent，detatchEvent[IE]
+* IE中要在事件前加on,而在Moz中不能加
+
+### **二、一道常被人轻视的前端JS面试题**
+
+> [答案解答网址](http://www.cnblogs.com/xxcanghai/p/5189353.html)
+
+```
+function Foo() {
+    getName = function () { alert (1); };
+    return this;
+}
+Foo.getName = function () { alert (2);};
+Foo.prototype.getName = function () { alert (3);};
+var getName = function () { alert (4);};
+function getName() { alert (5);}
+ 
+//答案：
+Foo.getName();//2
+getName();//4
+Foo().getName();//1
+getName();//1
+new Foo.getName();//2
+new Foo().getName();//3
+new new Foo().getName();//3
+```
 
 
 ## 2016.2.21
