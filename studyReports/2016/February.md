@@ -10,24 +10,763 @@
 
 > **主要内容：**
 	1. cookie与session
-	2. URL 详解与 URL 编码
+	2. URL详解与URL编码
 	3. 几种布局方式（双飞翼、圣杯、flex）
 	4. AMD与CMD对比
 	5. MVC与MVVM
 
+### **一、cookie与session**
 
-## 2016.2.27（待复盘）
+**（一）二者的定义**
+当你在浏览网站的时候，WEB服务器会先送一小小资料放在你的计算机上，Cookie会帮你在网站上所打的文字或是一些选择，都纪录下来。当下次你再光临同一个网站，WEB服务器会先看看有没有它上次留下的Cookie资料，有的话，就会依据Cookie里的内容来判断使用者，送出特定的网页内容给你。Cookie的使用很普遍，许多有提供个人化服务的网站，都是利用Cookie来辨认使用者，以方便送出使用者量身定做的内容，像是 Web 接口的免费 email 网站，都要用到 Cookie。
+具体来说cookie机制采用的是在客户端保持状态的方案，而session机制采用的是在服务器端保持状态的方案。
+同时我们也看到，由于采用服务器端保持状态的方案在客户端也需要保存一个标识，所以session机制可能需要借助于cookie机制来达到保存标识的目的，但实际上它还有其他选择。 
+1. cookie机制
+    正统的cookie分发是通过扩展HTTP协议来实现的，服务器通过在HTTP的响应头中加上一行特殊的指示以提示浏览器按照指示生成相应的cookie。然而纯粹的客户端脚本如JavaScript或者VBScript也可以生成cookie。而cookie的使用是由浏览器按照一定的原则在后台自动发送给服务器的。浏览器检查所有存储的cookie，如果某个cookie所声明的作用范围大于等于将要请求的资源所在的位置，则把该cookie附在请求资源的HTTP请求头上发送给服务器。
+    cookie的内容主要包括：名字，值，过期时间，路径和域。路径与域一起构成cookie的作用范围。
+    若不设置过期时间，则表示这个cookie的生命期为浏览器会话期间，关闭浏览器窗口，cookie就消失。这种生命期为浏览器会话期的cookie被称为会话cookie。会话cookie一般不存储在硬盘上而是保存在内存里，当然这种行为并不是规范规定的。若设置了过期时间，浏览器就会把cookie保存到硬盘上，关闭后再次打开浏览器，这些cookie仍然有效直到超过设定的过期时间。存储在硬盘上的cookie可以在不同的浏览器进程间共享，比如两个IE窗口。而对于保存在内存里的cookie，不同的浏览器有不同的处理方式。
+
+2. session机制
+    session机制是一种服务器端的机制，服务器使用一种类似于散列表的结构（也可能就是使用散列表）来保存信息。
+    当程序需要为某个客户端的请求创建一个session时，服务器首先检查这个客户端的请求里是否已包含了一个session标识（称为sessionid），如果已包含则说明以前已经为此客户端创建过session，服务器就按照sessionid把这个session检索出来使用（检索不到，会新建一个），如果客户端请求不包含sessionid，则为此客户端创建一个session并且生成一个与此session相关联的sessionid，sessionid的值应该是一个既不会重复，又不容易被找到规律以仿造的字符串，这个sessionid将被在本次响应中返回给客户端保存。保存这个sessionid的方式可以采用cookie，这样在交互过程中浏览器可以自动的按照规则把这个标识发送给服务器。一般这个cookie的名字都是类似于SEEESIONID。但cookie可以被人为的禁止，则必须有其他机制以便在cookie被禁止时仍然能够把sessionid传递回服务器。 
+经常被使用的一种技术叫做URL重写，就是把sessionid直接附加在URL路径的后面。还有一种技术叫做表单隐藏字段。就是服务器会自动修改表单，添加一个隐藏字段，以便在表单提交时能够把sessionid传递回服务器。比如： 
+
+    ```
+    <form name="testform" action="/xxx"> 
+    <input type="hidden" name="jsessionid" value="ByOK3vjFD75aPnrF7C2HmdnV6QZcEbzWoWiBYEnLerjQ99zWpBng!-145788764"> 
+    <input type="text"> 
+    </form>
+    ```
+    
+    实际上这种技术可以简单的用对action应用URL重写来代替。
+
+**（二）cookie 和session 的区别**
+1. cookie数据存放在客户的浏览器上，session数据放在服务器上。
+2. cookie不是很安全，别人可以分析存放在本地的COOKIE并进行COOKIE欺骗。考虑到安全应当使用session。
+3. session会在一定时间内保存在服务器上。当访问增多，会比较占用你服务器的性能。考虑到减轻服务器性能方面，应当使用COOKIE。
+4. 单个cookie保存的数据不能超过4K，很多浏览器都限制一个站点最多保存20个cookie。
+5. 所以个人建议：
+   **将登陆信息等重要信息存放为SESSION
+   其他信息如果需要保留，可以放在COOKIE中** 
+
+### **二、URL详解与URL编码**
+
+**（一）URL 与 URI**
+
+* URL：(Uniform/Universal Resource Locator 的缩写，统一资源定位符)。
+* URI：(Uniform Resource Identifier 的缩写，统一资源标识符)。
+* 关系：URI 属于 URL 更低层次的抽象，一种字符串文本标准。就是说，URI 属于父类，而 URL 属于 URI 的子类。URL 是 URI 的一个子集。二者的区别在于，URI 表示请求服务器的路径，定义这么一个资源。而 URL 同时说明要如何访问这个资源（http://）。
+
+**（二）端口与URL标准格式**
+
+* 端口(Port)：相当于一种数据的传输通道。用于接受某些数据，然后传输给相应的服务，而电脑将这些数据处理后，再将相应的回复通过开启的端口传给对方。
+* 端口的作用：因为IP地址与网络服务的关系是一对多的关系。所以实际上因特网上是通过IP地址加上端口号来区分不同的服务的。端口是通过端口号来标记的，端口号只有整数，范围是从0 到65535。
+* URL 标准格式：
+
+    ```
+    scheme://host[:port#]/path/…/[;url-params][?query-string][#anchor]
+    
+    scheme //有我们很熟悉的http、https、ftp以及著名的ed2k，迅雷的thunder等。
+    host //HTTP服务器的IP地址或者域名
+    port# //HTTP服务器的默认端口是80，这种情况下端口号可以省略。如果使用了别的端口，必须指明，例如tomcat的默认端口是8080 http://localhost:8080/
+    path //访问资源的路径
+    url-params //所带参数
+    query-string //发送给http服务器的数据
+    anchor //锚点定位
+    ```
+
+**（三）利用 `<a>`标签自动解析 url**
+
+> 原理是动态创建一个a标签，利用浏览器的一些原生方法及一些正则（为了健壮性正则还是要的），完美解析 URL，获取我们想要的任意一个部分。
+
+代码如下：
+
+```
+// This function creates a new anchor element and uses location
+// properties (inherent) to get the desired URL data. Some String
+// operations are used (to normalize results across browsers).
+
+function parseURL(url) {
+    var a = document.createElement('a');
+    a.href = url;
+    return {
+        source: url,
+        protocol: a.protocol.replace(':',''),
+        host: a.hostname,
+        port: a.port,
+        query: a.search,
+        params: (function(){
+        var ret = {},
+        seg = a.search.replace(/^\?/,'').split('&'),
+        len = seg.length, i = 0, s;
+        for (;i<len;i++) {
+            if (!seg[i]) { continue; }
+                s = seg[i].split('=');
+                ret[s[0]] = s[1];
+            }
+            return ret;
+        })(),
+        file: (a.pathname.match(/([^/?#]+)$/i) || [,''])[1],
+        hash: a.hash.replace('#',''),
+        path: a.pathname.replace(/^([^/])/,'/$1'),
+        relative: (a.href.match(/tps?:\/[^/]+(.+)/) || [,''])[1],
+        segments: a.pathname.replace(/^\//,'').split('/')
+    };
+}
+```
+
+Usage 使用方法：
+
+```
+var myURL = parseURL('http://abc.com:8080/dir/index.html?id=255&m=hello#top');
+myURL.file; // = 'index.html'
+myURL.hash; // = 'top'
+myURL.host; // = 'abc.com'
+myURL.query; // = '?id=255&m=hello'
+myURL.params; // = Object = { id: 255, m: hello }
+myURL.path; // = '/dir/index.html'
+myURL.segments; // = Array = ['dir', 'index.html']
+myURL.port; // = '8080'
+myURL.protocol; // = 'http'
+myURL.source; // = 'http://abc.com:8080/dir/index.html?id=255&m=hello#top'
+```
+
+利用上述方法，即可解析得到 URL 的任意部分。
+
+**（四）escape 、 encodeURI 、encodeURIComponent**
+
+1. escape()
+    
+    首先想声明的是，W3C把这个函数废弃了，身为一名前端如果还用这个函数是要打脸的。
+    escape只是对字符串进行编码（而其余两种是对URL进行编码），与URL编码无关。编码之后的效果是以 %XX 或者 %uXXXX 这种形式呈现的。它不会对 ASCII字符、数字 以及 @ * / + 进行编码。
+    根据 MDN 的说明，escape 应当换用为 encodeURI 或 encodeURIComponent；unescape 应当换用为 decodeURI 或 decodeURIComponent。escape 应该避免使用。举例如下：
+    
+    ```
+    encodeURI('https://www.baidu.com/ a b c')
+    // "https://www.baidu.com/%20a%20b%20c"
+    encodeURIComponent('https://www.baidu.com/ a b c')
+    // "https%3A%2F%2Fwww.baidu.com%2F%20a%20b%20c"
+    
+    //而 escape 会编码成下面这样，eocode 了冒号却没 encode 斜杠，十分怪异，故废弃之
+    escape('https://www.baidu.com/ a b c')
+    // "https%3A//www.baidu.com/%20a%20b%20c"
+    ```
+
+2. encodeURI()
+
+    encodeURI() 是 Javascript 中真正用来对 URL 编码的函数。它着眼于对整个URL进行编码。
+
+    ```
+    encodeURI("http://www.cnblogs.com/season-huang/some other thing");
+    //"http://www.cnblogs.com/season-huang/some%20other%20thing";
+    ```
+
+    编码后变为上述结果，可以看到空格被编码成了%20，而斜杠 `/` ，冒号 `:` 并没有被编码。
+    是的，它用于对整个 URL 直接编码，不会对`ASCII字母 、数字 、 ~ ! @ # $ & * ( ) = : / , ; ? + ‘ `进行编码。
+    
+    ```
+    encodeURI("~!@#$&*()=:/,;?+'")
+    // ~!@#$&*()=:/,;?+'
+    ```
+
+3. encodeURIComponent()
+    嘿，有的时候，我们的 URL 长这样子，请求参数中带了另一个 URL：`var URL = "http://www.a.com?foo=http://www.b.com?t=123&s=456";`直接对它进行 encodeURI 显然是不行的。因为 encodeURI 不会对冒号 : 及斜杠 / 进行转义，那么就会出现上述所说的服务器接受到之后解析会有歧义。
+
+    ```
+    encodeURI(URL)
+    // "http://www.a.com?foo=http://www.b.com?t=123&b=456"
+    ```
+    
+    这个时候，就该用到 `encodeURIComponent()` 。它的作用是对URL中的参数进行编码，记住是对参数，而不是对整个 URL 进行编码。因为它仅仅不对` ASCII字母、数字 ~ ! * ( ) ‘` 进行编码。
+    
+    错误的用法：
+
+    ```
+    var URL = "http://www.a.com?foo=http://www.b.com?t=123&s=456";
+    encodeURIComponent(URL);
+    // "http%3A%2F%2Fwww.a.com%3Ffoo%3Dhttp%3A%2F%2Fwww.b.com%3Ft%3D123%26s%3D456"
+    // 错误的用法，看到第一个 http 的冒号及斜杠也被 encode 了
+    ```
+    
+    正确的用法：encodeURIComponent() 着眼于对单个的参数进行编码：
+    
+    ```
+    var param = "http://www.b.com?t=123&s=456"; // 要被编码的参数
+    URL = "http://www.a.com?foo="+encodeURIComponent(param);
+    //"http://www.a.com?foo=http%3A%2F%2Fwww.b.com%3Ft%3D123%26s%3D456"
+    ```
+
+利用上述的使用<a>标签解析 URL 以及根据业务场景配合 encodeURI() 与 encodeURIComponent() 便能够很好的处理 URL 的编码问题。应用场景最常见的一个是手工拼接 URL 的时候，对每对 key-value 用 encodeURIComponent 进行转义，再进行传输。
+
+### **三、flex布局基础**
+
+> 原文链接： http://segmentfault.com/a/1190000004320409
+
+1. Flex布局是什么
+
+    Flex是Flexible Box的缩写，意为"弹性布局"，用来为盒状模型提供最大的灵活性。
+    
+    ```
+    //任何一个容器都可以指定为Flex布局。
+    .box{
+      display: flex;
+    }
+    
+    //行内元素也可以使用Flex布局。
+    .box{
+      display: inline-flex;
+    }
+    
+    //Webkit内核的浏览器，必须加上-webkit前缀。
+    .box{
+      display: -webkit-flex; /* Safari */
+      display: flex;
+    }
+    ```
+    
+    但是，设为Flex布局以后，子元素的float、clear和vertical-align属性将失效。
+
+2. 基本概念
+
+    采用Flex布局的元素，称为Flex容器（flex container），简称"容器"。它的所有子元素自动成为容器成员，称为flex item，简称"项目"。
+    容器默认存在两根轴：水平的主轴（main axis）和垂直的交叉轴（cross axis）。主轴的开始位置（与边框的交叉点）叫做main start，结束位置叫做main end；交叉轴的开始位置叫做cross start，结束位置叫做cross end。
+    项目默认沿主轴排列。单个项目占据的主轴空间叫做main size，占据的交叉轴空间叫做cross size。
+
+3. 容器的属性
+
+    * flex-direction：决定主轴的方向（即项目的排列方向）。
+    
+        ```
+        .box {
+          flex-direction: row //主轴为水平方向，起点在左端
+                | row-reverse //主轴为水平方向，起点在右端。
+                | column //主轴为垂直方向，起点在上沿。
+                | column-reverse;//主轴为垂直方向，起点在下沿。
+        }
+        ```
+    
+    * flex-wrap：默认情况下，项目都排在一条线（又称"轴线"）上。flex-wrap属性定义，如果一条轴线排不下，如何换行。
+        
+        ```
+        .box{
+          flex-wrap: nowrap | wrap | wrap-reverse;
+        }
+        // nowrap（默认）：不换行。
+        // wrap：换行，第一行在上方。
+        // wrap-reverse：换行，第一行在下方。
+        ```
+    
+    * flex-flow：是flex-direction属性和flex-wrap属性的简写形式，默认值为row nowrap
+    
+    * justify-content：定义了项目在主轴上的对齐方式。
+    
+        ```
+        .box {
+          justify-content: flex-start //（默认值）左对齐
+                | flex-end //右对齐
+                | center //居中
+                | space-between //两端对齐，项目之间的间隔都相等
+                | space-around;//每个项目两侧的间隔相等。所以，项目之间的间隔比项目与边框的间隔大一倍。
+        }
+        ```
+    * align-items：定义项目在交叉轴上如何对齐
+    
+        ```
+        .box {
+          align-items: flex-start //交叉轴的起点对齐
+            | flex-end //交叉轴的终点对齐
+            | center //交叉轴的中点对齐
+            | baseline //项目的第一行文字的基线对齐
+            | stretch;//默认值，如果项目未设置高度或设为auto，将占满整个容器的高度。
+        }
+        ```
+        
+    * align-content：定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用。
+    
+        ```
+        .box {
+          align-content: flex-start | flex-end | center 
+            //与交叉轴的起点对齐|终点|中点
+            | space-between //与交叉轴两端对齐，轴线之间的间隔平均分布
+            | space-around //每根轴线两侧的间隔都相等。所以，轴线之间的间隔比轴线与边框的间隔大一倍。
+            | stretch;//轴线占满整个交叉轴
+        }
+        ```
+
+4. item属性设置
+
+    * order：定义项目的排列顺序。数值越小，排列越靠前，默认为0。
+
+        ```
+        .item {
+          order: <integer>;
+        }
+        ```
+
+    * flex-grow：定义项目的放大比例，默认为0，即如果存在剩余空间，也不放大。
+
+        ```
+        .item {
+          flex-grow: <number>; /* default 0 */
+        }
+        ```
+
+    * flex-shrink：定义了项目的缩小比例，默认为1，即如果空间不足，该项目将缩小。
+
+        ```
+        .item {
+          flex-shrink: <number>; /* default 1 */
+        }
+        ```
+
+        如果所有项目的flex-shrink属性都为1，当空间不足时，都将等比例缩小。如果一个项目的flex-shrink属性为0，其他项目都为1，则空间不足时，前者不缩小。负值对该属性无效。
+
+    * flex-basis：定义了在分配多余空间之前，项目占据的主轴空间（main size）。浏览器根据这个属性，计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小。
+        
+        ```
+        .item {
+          flex-basis: <length> | auto; /* default auto */
+        }
+        ```
+        
+        它可以设为跟width或height属性一样的值（比如350px），则项目将占据固定空间。
+
+    * flex：是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 auto。后两个属性可选。
+
+        ```
+        .item {
+          flex: none | [ <'flex-grow'> <'flex-shrink'>? || <'flex-basis'> ]
+        }
+        ```
+        
+        该属性有两个快捷值：auto (1 1 auto) 和 none (0 0 auto)。建议优先使用这个属性，而不是单独写三个分离的属性，因为浏览器会推算相关值。
+
+    * align-self：允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
+
+        ```
+        .item {
+          align-self: auto | flex-start | flex-end | center | baseline | stretch;
+        }
+        ```
+        
+        该属性可能取6个值，除了auto，其他都与align-items属性完全一致。
+
+
+
+## 2016.2.27
 
 > **主要内容：**
 	1. 超文本传输协议（HTTP）介绍
 	2. HTTPS和HTTP的区别
 
+### **一、超文本传输协议（HTTP）介绍**
 
-## 2016.2.26（待复盘）
+> 超文本传输协议（HyperText Transfer Protocol，HTTP）是从服务器传输数据到客户端的传输协议。
+
+**（一）HTTP 的主要特点**
+1. 支持客户/服务器模式。
+2. **简单快速：** 客户向服务器请求服务时，只需传送请求方法和路径。由于HTTP协议简单，使得HTTP服务器的程序规模小，因而通信速度很快。
+3. **灵活：** HTTP允许传输任意类型的数据对象。传输的类型由 Content-Type 加以标记。
+4. **无连接：** 无连接的含义是限制每次连接只处理一个请求。服务器处理完客户的请求，并收到客户的应答后，即断开连接。采用这种方式可以节省传输时间。
+5. **无状态：** HTTP协议是无状态协议。无状态是指协议对于事务处理没有记忆能力。缺少状态意味着如果后续处理需要前面的信息，则它必须重传，这样可能导致每次连接传送的数据量增大。另一方面，在服务器不需要先前信息时它的应答就较快。
+
+**（二）客户端和服务器端交互的过程**
+1. 客户发起连接
+2. 客户发送请求
+3. 服务器响应请求
+4. 服务器关闭连接
+
+**（三）请求消息结构**
+> 一个请求消息是由请求行、请求头字段、一个空行和消息主体构成。
+
+```
+GET /hello.htm HTTP/1.1
+User-Agent: Mozilla/4.0 (compatible; MSIE5.01; Windows NT)
+Host: example.com
+Accept-Language: en-us
+Accept-Encoding: gzip, deflate
+```
+
+1. 请求行
+    > 请求行请求消息的第一行就是请求行。它指明使用的请求方法、资源标示符和 HTTP 版本。如 `GET /hello.htm HTTP/1.1`
+
+    **（1）请求方法**
+    请求方法用来定义操作资源的方式，HTTP/1.1 协议中定义了八种请求方法：
+    
+    * GET：读取资源数据
+    * POST：新建资源数据
+    * PUT：更新资源数据
+    * DELETE：删除资源数据
+    * HEAD：读取资源的元数据
+    * OPTIONS：读取该资源所支持的所有请求方法
+    * TRACE：回显服务器收到的请求，主要用于测试或诊断
+    * CONNECT：HTTP/1.1协议中预留给能够将连接改为管道方式的代理服务器。通常用于SSL加密服务器的链接（经由非加密的HTTP代理服务器）
+    此外，除了上述方法，特定的HTTP服务器还能够扩展自定义的方法。
+    
+    **（2）资源标示符**
+    资源标示符URI、URL和URN是用来识别、定位和命名互联网上的资源。
+    因为要通过多样的方式识别资源（人的名字可能相同，然而计算机文件只能通过唯一的路径名称组合访问），所以需要标准的识别WWW资源的途径。为了满足这种需要，Tim Berners-Lee 引入了标准的识别、定位和命名的途径：URI、URL和URN。
+    
+    * URI：Uniform Resource Identifier，统一资源标识符
+    * URL：Uniform Resource Locator，统一资源定位符
+    * URN：Uniform Resource Name，统一资源名称
+    
+    URL 和 URN 都属于 URI。
+    URI 和 URL 的区别是：URL 更具体。URI 和 URL 都定义了什么是资源。但 URL 还定义了如何获得资源。
+ 
+2. 请求头字段
+    > 请求头字段用来传递客户端的更多信息，以及传递解析消息主体的必要信息。
+
+	* Accept: 客户端接受哪些 Mine 类型。如 Accept: text/html
+	* Accept-Encoding: 支持的编码类型。如 gzip, deflate, sdch
+	* Accept-Language: 可接受的语言。如 en-US,en;q=0.8
+	* User-Agent:一个标识客户端的字符串。如 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML，like Gecko) Chrome/38.0.2125.101 Safari/537.36
+	* Cookie: Cookie。如 sessionid=c8422b97-98e2-4bc6-aa31-9b667d6ca4a5; theme=4;
+	* Referer: 从哪个页面到的该页面。
+
+3. 空行
+    > 空行指示头字段区完成，消息主体开始（如果有消息主体的话）。
+4. 消息主体
+    > 消息主体是请求消息的承载数据。比如在提交POST表单，并且表单方法不是GET时，表单数据就是打包在消息主体内的。消息主体是可选的。
+
+**（四）响应消息结构**
+
+> 响应消息由一个状态行、响应头字段、一个空行、消息主体构成。
+
+```
+HTTP/1.1 200 OK
+Date: Mon, 27 Jul 2009 12:28:53 GMT
+Server: Apache/2.2.14 (Win32)
+Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT
+Content-Length: 88
+Content-Type: text/html
+Connection: Closed
+
+<html>
+   <body>
+
+   <h1>Hello, World!</h1>
+
+   </body>
+</html>
+```
+
+1. 状态行
+    > 状态行由http版本、状态码、状态描述文字构成。如`HTTP/1.1 200 OK`
+
+    **所有的状态码的第一个数字代表了响应的五种状态之一:**
+	* 1xx：代表请求已被接受，需要继续处理。这类响应是临时响应，只包含状态行和某些可选的响应头信息，并以空行 结束。
+	* 2xx：代表请求接收、理解并且接受。
+	* 3xx：代表需要客户端采取进一步的操作才能完成请求。通常，这些状态码用来重定向，后续的请求地址（重定向目 标）在本次响应的Location域中指明。当且仅当后续的请求所使用的方法是GET或者HEAD时，用户浏览器才可以 在没有用户介入的情况下自动提交所需要的后续请求。
+	* 4xx：代表了客户端看起来可能发生了错误，妨碍了服务器的处理。除非响应的是一个HEAD请求，否则服务器就应 该返回一个解释当前错误状况的实体，以及这是临时的还是永久性的状况。
+	* 5xx：代表了服务器在处理请求的过程中有错误或者异常状态发生，，也有可能是服务器意识到以当前的软硬件资源 无法完成对请求的处理。
+
+    **常见状态码有：**
+	* 200: 请求已经成功，请求所希望的响应头或者数据体将随着此响应返回
+	* 202: 服务器已接受请求，但尚未处理。正如它可能被拒绝一样，最终该请求可能会也可能不会被执行。在异步操作的场合下，没有比发送这个状态码更方便的做法了
+	* 204: 服务器成功处理了请求，但不需要返回任何实体内容，并且希望返回更新了的元信息
+	* 304: 被请求的资源内容没有发生更改
+	* 400: 包含语法错误，无法被服务器解析
+	* 403: 服务器已经接收请求，但是拒绝执行
+	* 404: 请求失败，请求所希望得到的资源未在服务器上发现
+	* 408: 请求超时。客户端可以再次提交这一请求而无需任何修改
+	* 500: 服务器内部错误，无法处理请求
+	* 502: 作为网关或者代理工作的服务器尝试执行请求时，从上游服务器接收到无效响应
+	* 504: 作为网关或者代理工作的服务器尝试执行请求时，未能及时从上游服务器（URI标识出的服务器，例如HTTP、FTP、LDAP）或者辅助服务器（例如DNS）收到响应
+
+2. 响应头字段
+    > 和请求消息类似，首部字段会包括服务器本身的一些信息指示、以及响应消息本身的元数据。
+
+    **常见响应头有：**
+	* Content-Encoding: 数据的编码类型。如 Content-Encoding: gzip
+	* Server: 服务器的名称。如 Server:thin 1.5.0 codename Knife
+	* Location: 通知客户端新的资源位置。如 Location: http://www.github.com/login
+	* Content-Type: 响应数据的类型。如 Content-Type:text/html; charset=UTF-8
+	* Content-Encoding: 响应数据的编码格式。如 gzip。客户端会根据该值对响应内容解码。
+
+3. 消息主体
+    > 消息主体是响应消息的承载数据。
+
+### **二、HTTPS和HTTP的区别**
+
+**（一）为什么需要 https**
+
+HTTP 是明文传输的，也就意味着，介于发送端、接收端中间的任意节点都可以知道你们传输的内容是什么。这些节点可能是路由器、代理等。
+举个最常见的例子，用户登陆。用户输入账号，密码，**采用 HTTP 的话，只要在代理服务器上做点手脚就可以拿到你的密码了**。
+> 用户登陆 → 代理服务器（做手脚）→ 实际授权服务器
+
+在发送端对密码进行加密？没用的，虽然别人不知道你原始密码是多少，但能够拿到加密后的账号密码，照样能登陆。
+
+**（二）HTTPS 是如何保障安全的**
+
+HTTPS 其实就是 **secure http** 的意思啦，也就是 HTTP 的安全升级版。稍微了解网络基础的同学都知道，HTTP 是应用层协议，位于 HTTP 协议之下是传输协议 TCP。TCP 负责传输，HTTP 则定义了数据如何进行包装。
+> HTTP → TCP （明文传输）
+
+HTTPS 相对于 HTTP 有哪些不同呢？其实就是在 HTTP 跟 TCP 中间加多了一层加密层 **TLS/SSL**。
+
+1. 神马是 TLS/SSL？
+    通俗的讲，TLS、SSL 其实是类似的东西，SSL 是个加密套件，负责对 HTTP 的数据进行加密。TLS 是 SSL 的升级版。现在提到 HTTPS，加密套件基本指的是 TLS。
+2. 传输加密的流程
+    原先是应用层将数据直接给到 TCP 进行传输，现在改成应用层将数据给到TLS/SSL，将数据加密后，再给到 TCP 进行传输。
+
+**（三）HTTPS 是如何加密数据的**
+
+对安全或密码学基础有了解的同学，应该知道常见的加密手段。一般来说，加密分为对称加密、非对称加密（也叫公开密钥加密）。
+
+1. 对称加密
+    对称加密的意思就是，加密数据用的密钥，跟解密数据用的密钥是一样的。
+    对称加密的优点在于加密、解密效率通常比较高。缺点在于，数据发送方、数据接收方需要协商、共享同一把密钥，并确保密钥不泄露给其他人。此外，对于多个有数据交换需求的个体，两两之间需要分配并维护一把密钥，这个带来的成本基本是不可接受的。
+
+2. 非对称加密
+
+    非对称加密的意思就是，加密数据用的密钥（公钥），跟解密数据用的密钥（私钥）是不一样的。
+    什么叫做公钥呢？其实就是字面上的意思——公开的密钥，谁都可以查到。因此非对称加密也叫做公开密钥加密。
+相对应的，私钥就是非公开的密钥，一般是由网站的管理员持有。
+    公钥、私钥两个有什么联系呢？
+    简单的说就是，通过公钥加密的数据，只能通过私钥解开。通过私钥加密的数据，只能通过公钥解开。
+    **很多同学都知道用私钥能解开公钥加密的数据，但忽略了一点，私钥加密的数据，同样可以用公钥解密出来。**而这点对于理解 HTTPS 的整套加密、授权体系非常关键。
+
+3. 举个非对称加密的例子
+
+	* 登陆用户：小明
+	* 授权网站：某知名社交网站（以下简称 XX）
+	* 步骤一： 小明输入账号密码 → 浏览器用公钥加密 → 请求发送给 XX
+	* 步骤二： XX 用私钥解密，验证通过 → 获取小明社交数据，用私钥加密 → 浏览器用公钥解密数据，并展示。
+
+**（四）公开密钥加密：两个明显的问题**
+前面举了小明登陆社交网站 XX 的例子，但是单纯使用公开密钥加密存在两个比较明显的问题。
+* **问题一：公钥如何获取**
+    浏览器是怎么获得 XX 的公钥的？当然，小明可以自己去网上查，XX也可以将公钥贴在自己的主页。然而，对于一个动不动就成败上千万的社交网站来说，会给用户造成极大的不便利，毕竟大部分用户都不知道“公钥”是什么东西。
+* **问题二：数据传输仅单向安全**
+前面提到，公钥加密的数据，只有私钥能解开，于是小明的账号、密码是安全了，半路不怕被拦截。然后有个很大的问题：私钥加密的数据，公钥也能解开。加上公钥是公开的，小明的隐私数据相当于在网上换了种方式裸奔。（中间代理服务器拿到了公钥后，毫不犹豫的就可以解密小明的数据）
+
+下面就分别针对这两个问题进行解答。
+
+1. 问题一：公钥如何获取
+    这里要涉及两个非常重要的概念：证书、CA（证书颁发机构）。
+	* 证书
+        可以暂时把它理解为网站的身份证。这个身份证里包含了很多信息，其中就包含了上面提到的公钥。
+也就是说，当小明、小王、小光等用户访问 XX 的时候，再也不用满世界的找 XX 的公钥了。当他们访问 XX 的时候，XX 就会把证书发给浏览器，告诉他们说，乖，用这个里面的公钥加密数据。
+这里有个问题，所谓的“证书”是哪来的？这就是下面要提到的CA负责的活了。
+	* CA（证书颁发机构）
+        强调两点：
+        * 可以颁发证书的 CA 有很多（国内外都有）。
+        * 只有少数 CA 被认为是权威、公正的，这些 CA 颁发的证书，浏览器才认为是信得过的。比如 VeriSign。（CA自己伪造证书的事情也不是没发生过。。。）
+
+    证书颁发的细节这里先不展开，可以先简单理解为，网站向CA提交了申请，CA审核通过后，将证书颁发给网站，用户访问网站的时候，网站将证书给到用户。
+
+2. 问题二：数据传输仅单向安全
+    上面提到，通过私钥加密的数据，可以用公钥解密还原。那么，这是不是就意味着，网站传给用户的数据是不安全的？
+    答案是：是！！！（三个叹号表示强调的三次方）
+    看到这里，可能你心里会有这样想：用了 HTTPS，数据还是裸奔，这么不靠谱，还不如直接用 HTTP 来的省事。
+    但是，为什么业界对网站 HTTPS 化的呼声越来越高呢？这明显跟我们的感性认识相违背啊。
+    因为：**HTTPS 虽然用到了公开密钥加密，但同时也结合了其他手段，如对称加密，来确保授权、加密传输的效率、安全性。**
+    概括来说，整个简化的加密通信的流程就是：
+	* 小明访问 XX，XX 将自己的证书给到小明（其实是给到浏览器，小明不会有感知）
+	* 浏览器从证书中拿到 XX 的公钥 A
+	* 浏览器生成一个只有自己自己的对称密钥B，用公钥 A 加密，并传给 XX（其实是有协商的过程，这里为了便于理解先简化）
+	* XX 通过私钥解密，拿到对称密钥 B
+	* 浏览器、XX 之后的数据通信，都用密钥 B 进行加密
+
+    注意：对于每个访问 XX 的用户，生成的对称密钥B理论上来说都是不一样的。比如小明、小王、小光，可能生成的就是 B1、B2、B3.
+参考下图：
+
+**（五）HTTPS 握手流程**
+
+HTTPS 的数据传输流程整体上跟 HTTP 是类似的，同样包含两个阶段：握手、数据传输。
+1. 握手：证书下发，密钥协商（这个阶段都是明文的）
+2. 数据传输：这个阶段才是加密的，用的就是握手阶段协商出来的对称密钥
+
+
+## 2016.2.26
 
 > **主要内容：**
 	1. 移动端事件
-	2. 屏幕尺寸，分辨率，像素，PPI
+	2. 深入了解viewport和px
+
+### **一、移动端事件**
+
+**（一）click的300ms的延迟响应**
+
+Click事件在移动手机开发中有300ms的延迟，因为在手机早期，浏览器系统有放大和缩放功能，用户在屏幕上点击两次之后，系统会触发放大或者缩放功能，因此系统做了一个处理，当触摸一次后，在300ms这段时间内有没有触摸第二次，如果触摸了第二次的话，说明是触发放大或缩放功能，否则的话是click事件。因此当click时候，所有用户必须等待于300ms后才会触发click事件。所以当在移动端使用click事件的时候，会感觉到有300ms的迟钝。
+
+**（二）touch触摸事件**
+
+1. 触摸事件介绍
+	* touchstart：当手指放在屏幕上触发;
+	* touchmove：当手指在屏幕上滑动时，连续地触发;
+	* touchend：当手指从屏幕上离开时触发;
+	* touchcancel： 当系统停止跟踪时触发; 该事件暂时使用不到;
+    由于触摸会导致屏幕动来动去，所以我们可以在这些事件中函数内部使用 event.preventDefault()来阻止掉默认事件(默认滚动).
+
+2. 触摸属性介绍
+    * touches: 表示当前跟踪的触摸操作的touch对象的数组。
+        > 当一个手指在触屏上时，event.touches.length = 1;当二个手指在触屏上时，event.touches.length=2, 以此类推。
+
+    * targetTouches:特定于事件目标的touch对象的数组。
+        > touch事件会冒泡，所以我们可以使用这个属性指出目标对象。
+
+    * changedTouches:表示上次触摸以来发生了什么改变的touch对象的数组。
+    
+    * 每个touch对象都包含了以下属性：
+        * clientX: 触摸目标在视口中的X坐标。
+        * clientY: 触摸目标在视口中的Y坐标。
+        * Identifier: 标示触摸的唯一ID。
+        * pageX: 触摸目标在页面中的X坐标。
+        * pageY: 触摸目标在页面中的Y坐标。
+        * screenX: 触摸目标在屏幕中的X坐标。
+        * screenY: 触摸目标在屏幕中的Y坐标。
+        * target: 触摸的DOM节点目标。
+
+**（三）Gestures手势事件**
+
+> 这个事件针对IOS设备上的，一个Gestures事件在两个或更多手指触摸屏幕时触发。
+
+1. 手势事件介绍
+    * Gesturestart：当一个手指已经按在屏幕上，而另一个手指又触摸在屏幕时触发。
+    * Gesturechange：当触摸屏幕的任何一个手指的位置发生改变的时候触发。
+    * Gestureend：当任何一个手指从屏幕上面移开时触发。
+
+    > **触摸事件和手势事件的之间关系：**
+    > 当一个手指放在屏幕上时，会触发touchstart事件，而另一个手指触摸在屏幕上时触发gesturestart事件，随后触发基于该手指的touchstart事件。
+    > 如果一个或两个手指在屏幕上滑动时，将会触发gesturechange事件，但是只要有一个手指移开时候，则会触发gestureend事件，紧接着会触发touchend事件。
+
+2. 手势的专有属性：
+
+    * rotation: 表示手指变化引起的旋转角度，负值表示逆时针，正值表示顺时针，从0开始；
+    * scale: 表示2个手指之间的距离情况，向内收缩会缩短距离，这个值从1开始的，并随距离拉大而增长。
+
+
+**（四）基本知识点**
+
+1. 判断是否为iPhone
+
+    ```
+    function isAppleMobile() {
+        return (navigator.platform.indexOf('iPad') != -1);
+    };
+    ```
+
+2. 自动大写与自动修正
+    要关闭这两项功能，可以通过autocapitalize 与autocorrect 这两个选项：
+
+    ```
+    <input type="text" autocapitalize="off" autocorrect="off"/>`
+    ```
+
+3. 禁止iOS弹出各种操作窗口
+
+    ```
+    -webkit-touch-callout:none
+    ```
+
+4. 禁止用户选中文字
+
+    ```
+    -webkit-user-select:none
+    ```
+
+5. 关于 iOS 系统中，中文输入法输入英文时，字母之间可能会出现一个六分之一空格
+
+    ```
+    this.value = this.value.replace(/u2006/g, '');
+    ```
+
+6. Andriod 上去掉语音输入按钮
+
+    ```
+    input::-webkit-input-speech-button {display: none}
+    ```
+
+7. 判断是否为微信浏览器；
+
+    ```
+    function is_weixn(){
+        var ua = navigator.userAgent.toLowerCase();
+        if(ua.match(/MicroMessenger/i)=="micromessenger") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    ```
+
+8. 屏幕旋转事件(onorientationchange)
+
+    ```
+    //判断屏幕是否旋转的JS代码
+    function orientationChange() {
+        switch(window.orientation) {
+            case 0:
+            alert("肖像模式 0,screen-width: " + screen.width + "; screen-height:" + screen.height);
+            break;
+            case -90:
+            alert("左旋 -90,screen-width: " + screen.width + "; screen-height:" + screen.height);
+            break;
+            case 90:
+            alert("右旋 90,screen-width: " + screen.width + "; screen-height:" + screen.height);
+            break;
+            case 180:
+            alert("风景模式 180,screen-width: " + screen.width + "; screen-height:" + screen.height);
+            break;
+        };
+    };
+    // 添加测试监听函数代码如下：
+    addEventListener('load', function(){
+        orientationChange();
+    window.onorientationchange = orientationChange;
+    });
+    ```
+
+### **二、深入了解viewport和px**
+
+> 网址链接：[腾讯游戏@七宝童鞋分享的《深入了解viewport与px》](http://tgideas.qq.com/webplat/info/news_version3/804/7104/7106/m5723/201509/376281.shtml)
+
+1. 什么是绝对长度单位？什么是相对长度单位？
+    * **绝对长度单位：** in（inch英寸）、cm（厘米）、mm（毫米）、pt（磅）、pc（pica）。in、cm、mm和实际中的常用单位完全相同。pt是标准印刷上常用的单位，72pt的长度为1英寸。pc也是印刷上用的单位，1pc的长度为12磅。绝对长度单位，虽然理解起来很容易，但是在网页的设计中很少用到。所以我们就忽略它们吧。
+    * **相对长度单位：** 是网页设计中使用最多的长度单位，包括px、em、rem等。
+ 
+2. 什么是屏幕尺寸、屏幕分辨率、屏幕像素密度？ 
+    * **屏幕尺寸：** 指屏幕的对角线的长度，单位是英寸，1英寸=2.54厘米。
+    * **屏幕分辨率：** 指在横纵向上的像素点数，单位是px，1px=1个像素点。一般以纵向像素\*横向像素来表示一个手机的分辨率，如1960\*1080。（这里的1像素值得是物理设备的1个像素点）
+    * **屏幕像素密度：** 屏幕上每英寸可以显示的像素点的数量，单位是ppi，即“pixels per inch”的缩写。屏幕像素密度与屏幕尺寸和屏幕分辨率有关，在单一变化条件下，屏幕尺寸越小、分辨率越高，像素密度越大，反之越小。
+
+    > 计算像素密度的公式：
+    > 勾股定理算出对角线的分辨率：√(1920²+1080²)≈2203px
+    > 对角线分辨率除以屏幕尺寸：2203/5≈440dpi。
+ 
+3. 什么是ppi、dpi、dp、dip、sp、px？
+    * **ppi：** pixels per inch，屏幕上每英寸可以显示的像素点的数量，即屏幕像素密度。
+    * **dpi：** dots per inch，最初用于衡量打印物上每英寸的点数密度，就是打印机可以在一英寸内打多少个点。当dpi的概念用在计算机屏幕上时，就称之为ppi。ppi和dpi是同一个概念，Android比较喜欢使用dpi，IOS比较喜欢使用ppi。
+    * **dp、dip：** dp和dip都是Density Independent Pixels的缩写，密度独立像素，可以想象成是一个物理尺寸，使同样的设置在不同手机上显示的效果看起来是一样的。
+    Android和IOS都会通过转换系数让控件适应屏幕的尺寸。一个按钮给了44*44dp的大小，在160dpi密度的时候，按钮就是44*44px大小；在320dpi密度的时候，按钮就是88*88px的大小。不需要我们去书写多套尺寸。
+    * **sp：** scale independent pixels，用法与dp类似，是专门用来定义文字大小的，受用户android设备字体设置的影响。
+    * **px：** 就是通常所说的像素，是网页设计中使用最多的长度单位。将显示器分成非常细小的方格，每个方格就是一个像素。（网页重构中使用的px和屏幕分辨率的px不一定是一样的大小。）
+ 
+4. 什么是mdpi、hdpi、xdpi、xxdpi？
+
+    Google官方指定按照下列标准区分不同设备的dpi：
+    | 名称          | 像素密度范围  |
+    |:-------------:|:-------------:|
+    | mdpi          | 120dpi-160dpi |
+    | hdpi          | 160dpi-240dpi |
+    | xhdpi         | 240dpi-320dpi |
+    | xxhdpi        | 320dpi-480dpi |
+    | xxxhdpi       | 480dpi-640dpi |
+    
+    苹果的区分则更为简单：非高清屏、高清屏、超高清屏。
+
+
+5. viewport
+    手机浏览器是把页面放在一个虚拟的“窗口”（viewport）中，窗口可大于或小于手机的可视区域，一般手机默认viewport大于可视区域。这样不会破坏没有针对手机浏览器优化的网页的布局，用户可以通过平移和缩放来看网页的其他部分。
+
+    网页重构时使用的单位px，就是通常所说的像素，是网页设计中使用最多的长度单位。将显示器分成非常细小的方格，每个方格就是一个像素（这和我们理解的屏幕分辨率的1920px*1080px的px是不同的）。不同设置下，方格的大小不一样。
+    例如iPhone4S如果不设置viewport，他就会默认是980px，就像把屏幕分成980份（不是屏幕分辨率的640px哦！）。如果设置一个元素为100px*100px，看起来就是屏幕的100/980。
+    例如iPhone4S如果设置viewport width=device-width，他就会是320px，就像把屏幕分成320份（不是屏幕分辨率的640px哦！）。如果设置一个元素为100px*100px，看起来就是屏幕的100/320。
+    设置了viewport，width=device-width，弹出来的是设置好的宽度，375px、360px、320px。为什么是这个大小？这就要用到上面讲的知识点了。
+    iPhone6的屏幕分辨率是1334*750px，ppi是326，所以系数是2x。那device-width就等于750/2=375px。
+    红米1s的屏幕分辨率是1280*720px，ppi是312，所以系数是2x。那device-width就等于720/2=360px。
+    页面里的红色块给的是200*200px，在几个设备看起来好像差不多大的样子。
 
 
 ## 2016.2.25
