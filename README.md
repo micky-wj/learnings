@@ -1,4 +1,4 @@
-#记录下点滴学习
+# 记录下点滴学习
 
 * [2017-6-1 优化React写法和性能](https://github.com/micky-wj/learnings/tree/master/studyReports/20170601-ReactBeatify.md)
 * [2017-2-20 Windows环境下的MongoDB安装配置以及常用指令](https://github.com/micky-wj/learnings/tree/master/studyReports/20170220-mongdbForWindows.md)
@@ -11,7 +11,7 @@
 * [2016-9-23 移动端适配技巧](https://github.com/micky-wj/learnings/tree/master/studyReports/20160923-mobileAdaptation.md)
 * [2016-9-11 fis3打包功能](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-fis3-pack.md)
 * [2016-9-4 chrome开发者工具介绍](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-chromeDevTool.md)
-* [2016-9-4 eslint使用方法](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-eslint.md)    
+* [2016-9-4 eslint使用方法](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-eslint.md)
 * [2016-9-4 fiddler介绍](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-fiddler.md)    
 * [2016-9-4 Mock.js数据模拟工具使用](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-mockjs.md)    
 * [2016-9-4 sublime技巧](https://github.com/micky-wj/learnings/tree/master/studyReports/20160904-sublimeSkills.md)    
