@@ -1,5 +1,6 @@
 # 记录下点滴学习
 
+* [2017-9-1 高阶组件](https://github.com/micky-wj/learnings/tree/master/studyReports/20170901-HOC.md)
 * [2017-6-1 优化React写法和性能](https://github.com/micky-wj/learnings/tree/master/studyReports/20170601-ReactBeatify.md)
 * [2017-2-20 Windows环境下的MongoDB安装配置以及常用指令](https://github.com/micky-wj/learnings/tree/master/studyReports/20170220-mongdbForWindows.md)
 * [2016-12-14 webpack之loaders](https://github.com/micky-wj/learnings/tree/master/studyReports/20161214-webpackLoader.md)

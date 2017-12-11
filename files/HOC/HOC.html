@@ -1,0 +1,428 @@
+<!--
+    Powered By nodeppt - This is probably the best web presentation tool so far!
+    version: 1.4.5
+    site: https://github.com/ksky521/nodeppt
+    date: 
+-->
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HOC - By wangjuanmicky</title>
+    <link rel="stylesheet" media="all" href="./css/nodeppt.css">
+    <link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="./css/phone.css">
+    
+    <link rel="stylesheet" href="./js/highlight/styles/monokai_sublime.css">
+    <link rel="stylesheet" href="./css/font-awesome.css">
+    
+<link rel="stylesheet" href="./css/theme.moon.css">
+</head>
+<body>
+<div class="slides">
+    <slides id="container">
+        <slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>HOC·高阶组件</h1>
+<h2>演讲者：汪娟</h2>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>今天讲些什么?</h1>
+<h3>WHAT &amp; WHY &amp; HOW</h3>
+<img src="../imgs/1.jpg" style="width:30%;margin:0 auto;">
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>WHAT</h1>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"  data-on-build="Slide.magic" data-on-enter="Slide.magic.init"><section class="slide-wrapper"><div class="magic"><div class="magicItem current pagedown"  data-transition="newspaper"><article>
+<div class="magic-wrapper">
+<hgroup>
+<h2>WHAT-命名来源</h2>
+
+</hgroup><article>
+
+<blockquote>
+<p>高阶函数：把函数作为参数传入</p>
+</blockquote>
+<p><strong>举个例子：Array.forEach、Array.map、setTimeout、中间件</strong></p>
+<pre><code class="javascript">// map
+[1, 2, 3].map(function(i) {
+  return i * 2;
+});
+
+// 中间件
+function middleware(store) {
+  return function(next) {
+    return function(action) {
+      // do the thing
+    }
+  }
+}
+</code></pre>
+
+</article>
+</div>
+</article></div>
+<div class="magicItem next pagedown"  data-transition="newspaper"><article>
+<div class="magic-wrapper">
+<hgroup>
+<h2>WHAT-定义</h2>
+
+</hgroup><article>
+
+<blockquote>
+<p>高阶组件：以一个组件为参数，并返回新组件的方法</p>
+</blockquote>
+<pre><code class="jsx">import React, { Component } from &#39;react&#39;;
+
+export default (WrappedComponent) =&gt; {
+  class NewComponent extends Component {
+    // 可以做很多自定义逻辑
+    render () {
+      return &lt;WrappedComponent /&gt;
+    }
+  }
+  return NewComponent
+}
+</code></pre>
+
+</article>
+</div>
+</article></div></div></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>WHY</h1>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"  data-on-build="Slide.magic" data-on-enter="Slide.magic.init"><section class="slide-wrapper"><div class="magic"><div class="magicItem current pagedown" data-transition="fade"><article>
+<div class="magic-wrapper">
+<hgroup>
+<h2>WHY-用处</h2>
+
+</hgroup><article>
+
+<ul>
+<li>属性代理(Props Proxy)<ul>
+<li>操作 props</li>
+<li>通过 Refs 访问到组件实例</li>
+<li>提取 state</li>
+<li>用其他元素包裹 WrappedComponent</li>
+</ul>
+</li>
+<li>反向继承(Inheritance Inversion)<ul>
+<li>渲染劫持<pre><code class="js">function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      return super.render()
+    }
+  }
+}
+</code></pre>
+</li>
+<li>操作 state</li>
+</ul>
+</li>
+</ul>
+
+</article>
+</div>
+</article></div>
+<div class="magicItem next pagedown" data-transition="fade"><article>
+<div class="magic-wrapper">
+<hgroup>
+<h2>WHY-用处</h2>
+
+</hgroup><article>
+
+<div class="columns2" style="margin-top:60px;">
+  <ul>
+    <li>属性代理（Props Proxy)</li>
+    <li>反向继承 (Inheritance Inversion)</li>
+  </ul>
+  <span style="font-size:38px;"><strong>代码复用</strong></span>
+</div>
+</article>
+</div>
+</article></div></div></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article class="flexbox vcenter">
+<h1>HOW-从一个🌰开始</h1>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"  data-on-build="Slide.magic" data-on-enter="Slide.magic.init"><section class="slide-wrapper"><div class="magic"><div class="magicItem current pagedown"  data-transition="fadeIn"><article>
+<div class="magic-wrapper">
+<article>
+
+<blockquote>
+<p>评论列表组件:从外部数据源订阅数据并渲染评论列表</p>
+<pre><code class="jsx">class CommentList extends React.Component {
+  state = {
+    comments: DataSource.getComments()// &quot;DataSource&quot; 就是全局的数据源
+  };
+  handleChange = () =&gt; { // 任何时候数据发生改变就更新组件
+    this.setState({ comments: DataSource.getComments()});
+  }
+  componentDidMount() { // 添加事件处理函数订阅数据
+    DataSource.addChangeListener(this.handleChange);
+  }
+  componentWillUnmount() {// 清除事件处理函数
+    DataSource.removeChangeListener(this.handleChange);
+  }
+  render() {
+    return &lt;div&gt;
+      {this.state.comments.map((comment) =&gt; (
+        &lt;Comment comment={comment} key={comment.id} /&gt;
+      ))}
+    &lt;/div&gt;
+  }
+}
+</code></pre>
+</blockquote>
+
+</article>
+</div>
+</article></div>
+<div class="magicItem next pagedown"  data-transition="fadeIn"><article>
+<div class="magic-wrapper">
+<article>
+<blockquote>
+<p>博客订阅组件：标志单个博客文章的订阅状态</p>
+<pre><code class="jsx">class BlogPost extends React.Component {
+  handleChange = () =&gt; {
+    this.setState({
+      blogPost: DataSource.getBlogPost(this.props.id)
+    });
+  }
+  state = {
+    blogPost: DataSource.getBlogPost(props.id)
+  };
+  componentDidMount() {
+    DataSource.addChangeListener(this.handleChange);
+  }
+  componentWillUnmount() {
+    DataSource.removeChangeListener(this.handleChange);
+  }
+  render() {
+    return &lt;TextBlock text={this.state.blogPost} /&gt;;
+  }
+}
+</code></pre>
+</blockquote>
+
+</article>
+</div>
+</article></div>
+<div class="magicItem far-next pagedown"  data-transition="fadeIn"><article>
+<div class="magic-wrapper">
+<article>
+<blockquote>
+<p>设想下应用场景</p>
+<pre><code class="jsx">const CommentListWithSubscription = withSubscription(
+  CommentList,
+  (DataSource) =&gt; DataSource.getComments()
+);
+const BlogPostWithSubscription = withSubscription(
+  BlogPost,
+  (DataSource, props) =&gt; DataSource.getBlogPost(props.id)
+});
+</code></pre>
+</blockquote>
+
+</article>
+</div>
+</article></div>
+<div class="magicItem "  data-transition="fadeIn"><article>
+<div class="magic-wrapper">
+<article>
+<blockquote>
+<p>最终结果</p>
+<pre><code class="jsx">function withSubscription(WrappedComponent, selectData) {
+  return class extends React.Component {
+    state = {
+      data: selectData(DataSource, props)
+    };
+    handleChange = () =&gt; {
+      this.setState({
+        data: selectData(DataSource, this.props)
+      });
+    }
+    componentDidMount() {
+      DataSource.addChangeListener(this.handleChange);
+    }
+    componentWillUnmount() {
+      DataSource.removeChangeListener(this.handleChange);
+    }
+    render() {
+      return &lt;WrappedComponent data={this.state.data} {...this.props} /&gt;;
+    }
+  };
+}
+</code></pre>
+</blockquote>
+
+</article>
+</div>
+</article></div></div></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>HOW-公约</h2>
+<h2>综上所述，高阶组件是一个<strong>没有副作用的纯组件</strong></h2>
+<ul class="rollIn">
+<li>不要改变原始组件（否则会产生副作用）</li>
+<li>不相关的参数不应该传递给被包裹的组件（确保可扩展性和可复用性）</li>
+<li>给包裹组件一个名词（便于debug）</li>
+<li>HOC仅接收单一参数的，即<code>Component =&gt; Component</code>（方便排列组合）<pre><code class="js">// 普通的做法
+const EnhancedComponent = connect(commentSelector)(withRouter(WrappedComponent))
+// 更好的做法
+// compose(f, g, h) 和 (...args) =&gt; f(g(h(...args))) 效果一样
+const enhance = compose(
+// 他们都是接收单一参数的 HOC
+connect(commentSelector),
+withRouter
+)
+const EnhancedComponent = enhance(WrappedComponent)
+</code></pre>
+</li>
+</ul>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意事项</h2>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意1-生命周期的执行顺序</h2>
+<iframe data-src="http://jsbin.com/tojapeb/5/edit?js" src="about:blank;" style="height:80vh;width:100%;"></iframe>
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意1-生命周期的执行顺序(反向继承)</h2>
+<iframe data-src="http://jsbin.com/tojapeb/7/edit?js" src="about:blank;" style="height:80vh;width:100%;"></iframe>
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意2-不要再render函数中使用高阶组件</h2>
+<pre><code class="js">render() {
+  // 每一次render函数调用都会创建一个新的EnhancedComponent实例
+  // EnhancedComponent1 !== EnhancedComponent2
+  const EnhancedComponent = enhance(MyComponent);
+  // 每一次都会使子对象树完全被卸载或移除
+  return &lt;EnhancedComponent /&gt;;
+}
+</code></pre>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意3-必须将静态方法做拷贝</h2>
+<pre><code class="js">// 定义静态方法
+WrappedComponent.staticMethod = function() {/*...*/}
+// 使用高阶组件
+const EnhancedComponent = enhance(WrappedComponent);
+// 增强型组件没有静态方法
+typeof EnhancedComponent.staticMethod === &#39;undefined&#39; // true
+---你可以像下面那么做
+function enhance(WrappedComponent) {
+  class Enhance extends React.Component {/*...*/}
+  // 必须得知道要拷贝的方法 :(
+  Enhance.staticMethod = WrappedComponent.staticMethod;
+  return Enhance;
+}
+</code></pre>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+<h2>注意4-Refs属性不能传递</h2>
+<pre><code class="js">function Field({ inputRef, ...rest }) {
+  return &lt;input ref={inputRef} {...rest} /&gt;;
+}
+// 在高阶组件中增强Field组件
+const EnhancedField = enhance(Field);
+// 组件的render函数中……
+&lt;EnhancedField
+  inputRef={(inputEl) =&gt; {
+    // 该回调函数被作为常规的props属性传递
+    this.inputEl = inputEl
+  }}
+/&gt;
+// 现在你就可以愉快的调用控制函数了
+this.inputEl.focus();
+</code></pre>
+
+</article></section></slide>
+<slide class="slide" data-transition="vertical3d"><section class="slide-wrapper"><article>
+
+<p>谢谢大家，希望能给大家带来启发和帮助~</p>
+
+</article></section></slide>
+        
+
+        <!-- <slide class="slide logoslide dark nobackground">
+            <article class="flexbox vcenter">
+                <h2 style="color: white;">Powered By nodeppt v1.4.5</h2>
+            </article>
+        </slide> -->
+        <div class="slideTip" id="tip"></div>
+    </slides>
+</div>
+<canvas id="drawBoard" class="draw-board" width="900" height="700"></canvas>
+<div class="progress"><span id="progress"></span></div>
+<div id="_buttons">
+    <div class="_btn-box" id="_btn-box" style="display:none;">
+        <button class="fa fa-arrow-circle-left" id="_btn-prev"></button>
+        <button class="fa fa-arrow-circle-right" id="_btn-next"></button>
+        <button class="fa fa-paint-brush" id="_btn-brush"></button>
+        <button class="fa fa-compress" id="_btn-overview" data-toggle="fa fa-expand"></button>
+    </div>
+    <button class="fa fa-bars" id="_btn-bar"  data-toggle="fa fa-close"></button>
+</div>
+<script src="./js/mixjs/lib/mix.0.3.0.min.js"></script>
+<script>
+    var ASSET_RELATIVE_DIR = ".";
+</script>
+<script>
+var base = location.protocol + '//' + location.host;
+
+var path = (location.pathname + '#').split('/').filter(function(v){
+    return !!v;
+});
+path.pop();
+path = path.join('/');
+if (typeof ASSET_RELATIVE_DIR === 'string') {
+    path = path + '/' + ASSET_RELATIVE_DIR;
+}
+MixJS.config({
+    baseURL: [ base, path, 'js'].join('/')+'/'
+});
+
+</script>
+<script src="./js/mixjs/lib/event/broadcast.js"></script>
+<script src="./js/nodeppt.js"></script>
+<script>
+Slide.init({
+    containerID: 'container',
+    drawBoardID: 'drawBoard',
+    slideClass: '.slide',
+    buildClass: '.build',
+    progressID: 'progress',
+    transition: 'cards',
+    width: 1100,
+    dir: './',
+    
+    //打开下面的注释就开启postMessage方式
+    //访问网址127.0.0.1:8080/ppt/demo#client
+    control:{
+        type: 'postMessage',
+        args:{
+            isControl:  false
+        }
+    },
+    
+    tipID: 'tip'
+});
+MixJS.loadJS('highlight/highlight.pack.js',function(){
+    hljs.tabReplace = '  ';
+    hljs.initHighlightingOnLoad();
+});
+</script>
+<script src="./js/demo.js"></script>
+<link rel="stylesheet" href="./css/demo.css">
+
+<!--placeholder-->
+</body>
+</html>
