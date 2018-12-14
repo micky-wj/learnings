@@ -1,5 +1,9 @@
 # 记录下点滴学习
 
+* [2018-12-05 移动端开发经验](https://github.com/micky-wj/learnings/tree/master/studyReports/20181205-mobileDevelop.md)
+* [2018-12-03 React-setState五大问](https://github.com/micky-wj/learnings/tree/master/studyReports/20181203-reactSetState.md)
+* [2018-11-06 eslint配置](https://github.com/micky-wj/learnings/tree/master/studyReports/20181106-eslint.md)
+* [2018-10-25 You don't know js 读书笔记](https://github.com/micky-wj/learnings/tree/master/studyReports/20181025-YDJS.md)
 * [2017-9-1 高阶组件](https://github.com/micky-wj/learnings/tree/master/studyReports/20170901-HOC.md)
 * [2017-6-1 优化React写法和性能](https://github.com/micky-wj/learnings/tree/master/studyReports/20170601-ReactBeatify.md)
 * [2017-2-20 Windows环境下的MongoDB安装配置以及常用指令](https://github.com/micky-wj/learnings/tree/master/studyReports/20170220-mongdbForWindows.md)
